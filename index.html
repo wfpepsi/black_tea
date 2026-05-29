@@ -3,1008 +3,1033 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>模力通 · AI 职场智能写作平台</title>
+<title>模力通 · 新功能集成方案原型</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 tailwind.config = {
   theme: {
-    fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
-    extend: { colors: { brand: '#4285F4' } }
+    fontFamily: { sans: ['Inter','PingFang SC','Microsoft YaHei','sans-serif'] },
+    extend: { colors: { brand: '#4A6CF7' } }
   }
 }
 </script>
 <style>
-  * { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 99px; }
+  * { font-family: 'Inter','PingFang SC','Microsoft YaHei',sans-serif; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background:#E2E8F0; border-radius:99px; }
 
-  /* View system */
-  .view { display: none; }
-  .view.active { display: flex; }
+  .view { display:none; }
+  .view.active { display:flex; }
 
-  /* Tab system */
-  .tab-pane { display: none; }
-  .tab-pane.active { display: block; }
+  .tab-pane { display:none; }
+  .tab-pane.active { display:block; }
 
-  /* Nav active state */
-  .nav-btn.active { background: #EFF6FF; color: #4285F4; }
-  .nav-btn.active .nav-icon { color: #4285F4; }
-  .nav-btn { transition: background 0.12s; }
-  .nav-btn:hover:not(.active) { background: #F9FAFB; }
+  .nav-item { border-radius:8px; transition:all .12s; cursor:pointer; }
+  .nav-item:hover:not(.active) { background:#F1F5F9; }
+  .nav-item.active { background:#EEF2FF; }
+  .nav-item.active .nav-label { color:#4A6CF7; font-weight:600; }
+  .nav-item.active .nav-icon-wrap { color:#4A6CF7; }
 
-  /* Cards */
-  .assistant-card { transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s; cursor: pointer; }
-  .assistant-card:hover { box-shadow: 0 4px 24px rgba(66,133,244,0.10); border-color: #BFDBFE; transform: translateY(-1px); }
+  .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.35); backdrop-filter:blur(4px); z-index:80; align-items:center; justify-content:center; }
+  .modal-bg.open { display:flex; }
 
-  /* Aux buttons */
-  .aux-btn { transition: background 0.12s, border-color 0.12s, color 0.12s; }
-  .aux-btn:hover { background: #EFF6FF; border-color: #93C5FD; color: #4285F4; }
-  .aux-btn:active { transform: scale(0.96); }
+  .slide-panel { transform:translateX(100%); transition:transform .22s cubic-bezier(.4,0,.2,1); }
+  .slide-panel.open { transform:translateX(0); }
 
-  /* Version panel */
-  .ver-panel { transform: translateX(100%); transition: transform 0.22s cubic-bezier(0.4,0,0.2,1); }
-  .ver-panel.open { transform: translateX(0); }
+  .ver-panel { transform:translateX(100%); transition:transform .2s ease; }
+  .ver-panel.open { transform:translateX(0); }
 
-  /* Modal */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.45); backdrop-filter: blur(3px); z-index: 60; align-items: center; justify-content: center; }
-  .modal-bg.open { display: flex; }
+  .tag { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:500; }
 
-  /* Tooltip quote highlight */
-  .quote-mark { background: #FFFBEB; border-left: 2.5px solid #F59E0B; padding: 2px 6px 2px 8px; border-radius: 0 4px 4px 0; }
+  .new-badge { display:inline-block; font-size:10px; font-weight:700; background:#4A6CF7; color:white; padding:1px 5px; border-radius:4px; margin-left:4px; vertical-align:middle; }
 
-  /* Typing dots */
-  .dot-pulse { animation: dotPulse 1.3s ease-in-out infinite; }
-  .dot-pulse:nth-child(2) { animation-delay: 0.2s; }
-  .dot-pulse:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes dotPulse { 0%,100%{opacity:.25;transform:scale(.8)} 50%{opacity:1;transform:scale(1)} }
+  .card-hover { transition:box-shadow .15s,transform .15s; }
+  .card-hover:hover { box-shadow:0 8px 24px rgba(74,108,247,.12); transform:translateY(-1px); }
 
-  /* Chat message animation */
-  .msg-in { animation: msgIn 0.18s ease; }
-  @keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  .msg-in { animation:msgIn .18s ease; }
+  @keyframes msgIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
 
-  /* Toast */
-  .toast-item { animation: toastIn 0.25s ease; }
-  @keyframes toastIn { from{opacity:0;transform:translateY(12px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+  .dot-typing { animation:dotT 1.2s ease-in-out infinite; }
+  .dot-typing:nth-child(2){animation-delay:.2s}
+  .dot-typing:nth-child(3){animation-delay:.4s}
+  @keyframes dotT { 0%,100%{opacity:.25;transform:scale(.7)} 50%{opacity:1;transform:scale(1)} }
 
-  /* Progress bar shimmer */
-  .shimmer { background: linear-gradient(90deg,#FBBF24 0%,#FDE68A 50%,#FBBF24 100%); background-size: 200% 100%; animation: shimmer 1.8s linear infinite; }
-  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .toast-item { animation:tIn .22s ease; }
+  @keyframes tIn { from{opacity:0;transform:translateY(10px) scale(.95)} to{opacity:1;transform:none} }
 
-  /* Step circle */
-  .step-circle { transition: background 0.2s, color 0.2s; }
+  .shimmer { background:linear-gradient(90deg,#FBBF24,#FDE68A,#FBBF24); background-size:200%; animation:sh 1.8s linear infinite; }
+  @keyframes sh { 0%{background-position:200%} 100%{background-position:-200%} }
 
-  /* Template preview skeleton */
-  .skel { background: #F3F4F6; border-radius: 3px; }
+  .step-dot { transition:all .18s; }
 
-  /* Document paper look */
-  .paper { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.05); }
+  .quote-hl { background:#FFFBEB; border-left:3px solid #F59E0B; padding:2px 8px 2px 10px; border-radius:0 6px 6px 0; }
+
+  .submenu { display:none; }
+  .submenu.open { display:block; }
 </style>
 </head>
-<body class="bg-[#F7F8FA] flex h-screen overflow-hidden text-gray-900 select-none">
+<body class="bg-[#F5F6FA] text-gray-900 flex h-screen overflow-hidden">
 
-<!-- ═══════════════════════════════════════════════
+<!-- ══════════════════════════════════════
      SIDEBAR
-═══════════════════════════════════════════════ -->
-<aside class="w-[220px] flex-shrink-0 bg-white border-r border-gray-100 flex flex-col z-10">
+══════════════════════════════════════ -->
+<aside id="sidebar" class="w-[196px] flex-shrink-0 bg-white border-r border-gray-100 flex flex-col z-20 transition-all duration-200">
 
   <!-- Logo -->
-  <div class="h-14 flex items-center px-4 border-b border-gray-100 gap-3">
-    <div class="w-8 h-8 rounded-xl bg-[#4285F4] flex items-center justify-center shadow-sm">
-      <span class="text-white font-bold text-sm tracking-tight">M</span>
+  <div class="h-14 flex items-center px-4 border-b border-gray-100 gap-2 flex-shrink-0">
+    <div class="flex items-center gap-1.5">
+      <div class="w-7 h-7 rounded-lg bg-[#4A6CF7] flex items-center justify-center">
+        <span class="text-white font-bold text-xs tracking-tight">M</span>
+      </div>
+      <span class="text-[#4A6CF7] font-bold text-sm">midu</span>
+      <span class="font-semibold text-gray-700 text-sm">模力通</span>
     </div>
-    <span class="font-semibold text-[15px] text-gray-900 tracking-tight">模力通</span>
-    <span class="ml-auto text-[10px] font-semibold bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded-md">专业版</span>
   </div>
 
   <!-- Nav -->
-  <nav class="p-3 space-y-0.5 flex-1">
-    <button data-view="write" onclick="showView('write')"
-      class="nav-btn active w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-      <svg class="nav-icon w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-      </svg>
-      写作中心
-    </button>
-    <button data-view="assistants" onclick="showView('assistants')"
-      class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-      <svg class="nav-icon w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"/>
-      </svg>
-      助手库
-      <span class="ml-auto text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded font-medium">3</span>
-    </button>
-    <button data-view="templates" onclick="showView('templates')"
-      class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-      <svg class="nav-icon w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
-      </svg>
-      模板库
-    </button>
-    <button data-view="history" onclick="showView('history')"
-      class="nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
-      <svg class="nav-icon w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      历史记录
-    </button>
+  <nav class="flex-1 overflow-y-auto p-2 space-y-0.5">
 
-    <div class="pt-4 pb-1 px-3">
-      <p class="text-[11px] font-semibold text-gray-300 uppercase tracking-widest">最近文稿</p>
+    <div class="nav-item active flex items-center gap-2.5 px-3 py-2" onclick="showView('home')">
+      <div class="nav-icon-wrap w-5 h-5 text-gray-400 flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M10 2a.75.75 0 01.528.22l7.25 7.25a.75.75 0 01-1.06 1.06L16 9.81V17a1 1 0 01-1 1H5a1 1 0 01-1-1V9.81L3.28 10.53a.75.75 0 01-1.06-1.06l7.25-7.25A.75.75 0 0110 2z"/></svg>
+      </div>
+      <span class="nav-label text-sm text-gray-600">AI 智能体</span>
     </div>
-    <button onclick="showView('write')" class="nav-btn w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm text-gray-500">
-      <svg class="w-3 h-3 text-gray-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>
-      <span class="truncate">2025年Q1工作总结</span>
-    </button>
-    <button class="nav-btn w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm text-gray-500">
-      <svg class="w-3 h-3 text-gray-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>
-      <span class="truncate">五四青年节讲话稿</span>
-    </button>
-    <button class="nav-btn w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm text-gray-500">
-      <svg class="w-3 h-3 text-gray-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/></svg>
-      <span class="truncate">信息化建设情况汇报</span>
-    </button>
+
+    <div class="nav-item flex items-center gap-2.5 px-3 py-2" onclick="showView('writer')">
+      <div class="nav-icon-wrap w-5 h-5 text-gray-400 flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+      </div>
+      <span class="nav-label text-sm text-gray-600">AI 公文写作</span>
+    </div>
+
+    <div class="nav-item flex items-center gap-2.5 px-3 py-2" onclick="showView('home')">
+      <div class="nav-icon-wrap w-5 h-5 text-gray-400 flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+      </div>
+      <span class="nav-label text-sm text-gray-600">AI 风格仿写</span>
+    </div>
+
+    <!-- NEW: AI升华引用 -->
+    <div class="nav-item flex items-center gap-2.5 px-3 py-2" onclick="showView('elevation')">
+      <div class="nav-icon-wrap w-5 h-5 text-[#F59E0B] flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+      </div>
+      <span class="nav-label text-sm text-gray-600">AI 升华引用</span>
+      <span class="new-badge">新</span>
+    </div>
+
+    <div class="nav-item flex items-center gap-2.5 px-3 py-2" onclick="showView('home')">
+      <div class="nav-icon-wrap w-5 h-5 text-gray-400 flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+      </div>
+      <span class="nav-label text-sm text-gray-600">AI 内容审校</span>
+    </div>
+
+    <div class="nav-item flex items-center gap-2.5 px-3 py-2" onclick="showView('home')">
+      <div class="nav-icon-wrap w-5 h-5 text-gray-400 flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+      </div>
+      <span class="nav-label text-sm text-gray-600">AI 公文校对</span>
+    </div>
+
+    <div class="nav-item flex items-center gap-2.5 px-3 py-2" onclick="showView('home')">
+      <div class="nav-icon-wrap w-5 h-5 text-gray-400 flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+      </div>
+      <span class="nav-label text-sm text-gray-600">AI 会议纪要</span>
+    </div>
+
+    <div class="nav-item flex items-center gap-2.5 px-3 py-2" onclick="showView('home')">
+      <div class="nav-icon-wrap w-5 h-5 text-gray-400 flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+      </div>
+      <span class="nav-label text-sm text-gray-600">AI 知识问答</span>
+    </div>
+
+    <!-- 资料库 with submenu -->
+    <div>
+      <div class="nav-item flex items-center gap-2.5 px-3 py-2" onclick="toggleSubmenu()">
+        <div class="nav-icon-wrap w-5 h-5 text-gray-400 flex items-center justify-center flex-shrink-0">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+        </div>
+        <span class="nav-label text-sm text-gray-600 flex-1">资料库</span>
+        <svg id="submenu-arrow" class="w-3.5 h-3.5 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </div>
+      <div id="submenu-lib" class="submenu pl-8 space-y-0.5">
+        <div class="nav-item flex items-center gap-2 px-3 py-1.5" onclick="showView('templates')">
+          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5z"/></svg>
+          <span class="text-xs text-gray-600">排版模板库</span>
+          <span class="new-badge">新</span>
+        </div>
+        <div class="nav-item flex items-center gap-2 px-3 py-1.5">
+          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span class="text-xs text-gray-600">知识库</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="pt-3">
+      <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 mb-1">历史记录</p>
+    </div>
+    <div class="nav-item px-3 py-1.5 flex items-center gap-2" onclick="showView('writer')">
+      <span class="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0"></span>
+      <span class="text-xs text-gray-500 truncate">2025年Q1工作总结</span>
+    </div>
+    <div class="nav-item px-3 py-1.5 flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0"></span>
+      <span class="text-xs text-gray-500 truncate">五四青年节讲话稿</span>
+    </div>
+    <div class="nav-item px-3 py-1.5 flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0"></span>
+      <span class="text-xs text-gray-500 truncate">信息化建设汇报</span>
+    </div>
   </nav>
 
-  <!-- User profile -->
-  <div class="p-3 border-t border-gray-100">
-    <div class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-      <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0">
-        <span class="text-white text-xs font-semibold">王</span>
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-gray-800 leading-none">王主任</p>
-        <p class="text-[11px] text-gray-400 mt-0.5 truncate">某市政府办公室</p>
-      </div>
-      <svg class="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-      </svg>
-    </div>
+  <!-- Bottom -->
+  <div class="p-3 border-t border-gray-100 flex-shrink-0 flex items-center gap-2">
+    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+    <span class="text-xs text-gray-500 flex-1">知识库</span>
+    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18"/></svg>
+    <span class="text-xs text-gray-500">文风助手库</span>
   </div>
 </aside>
 
-<!-- ═══════════════════════════════════════════════
+<!-- ══════════════════════════════════════
      MAIN
-═══════════════════════════════════════════════ -->
-<main class="flex-1 flex flex-col overflow-hidden relative">
+══════════════════════════════════════ -->
+<div class="flex-1 flex flex-col overflow-hidden">
 
-<!-- ───────────────────────────────────────────────
-     VIEW: WRITING CENTER
-─────────────────────────────────────────────── -->
-<div id="view-write" class="view active flex-col flex-1 overflow-hidden">
-
-  <!-- Top bar -->
-  <header class="h-14 bg-white border-b border-gray-100 flex items-center px-5 gap-4 flex-shrink-0">
-    <h1 class="text-sm font-semibold text-gray-800 truncate max-w-xs">2025年第一季度工作总结</h1>
-
-    <!-- Assistant selector -->
-    <div class="relative ml-2" id="asst-dropdown-wrap">
-      <button onclick="toggleAsstDropdown()"
-        class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
-        <span class="w-2 h-2 rounded-full bg-green-400"></span>
-        季度汇报风格
-        <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+  <!-- Top Header -->
+  <header class="h-14 bg-white border-b border-gray-100 flex items-center px-5 gap-4 flex-shrink-0 z-10">
+    <div class="flex-1"></div>
+    <div class="flex items-center gap-2">
+      <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
       </button>
-      <div id="asst-dropdown" class="hidden absolute top-full left-0 mt-1.5 bg-white border border-gray-100 rounded-xl shadow-xl p-1.5 z-40 w-52">
-        <button onclick="selectAsst('季度汇报风格','green')" class="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
-          <span class="w-2 h-2 rounded-full bg-green-400"></span>季度汇报风格
-        </button>
-        <button onclick="selectAsst('对外公开文章','green')" class="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg">
-          <span class="w-2 h-2 rounded-full bg-green-400"></span>对外公开文章
-        </button>
-        <div class="my-1 border-t border-gray-100"></div>
-        <button onclick="selectAsst('不使用助手','gray')" class="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:bg-gray-50 rounded-lg">
-          <span class="w-2 h-2 rounded-full bg-gray-300"></span>不使用助手
-        </button>
+      <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+      </button>
+      <button onclick="showView('stylelib')" class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-colors relative">
+        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"/></svg>
+      </button>
+      <button class="w-8 h-8 flex items-center justify-center bg-[#4A6CF7] text-white rounded-lg text-xs font-bold hover:bg-indigo-600 transition-colors">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      </button>
+      <div class="flex items-center gap-1.5 ml-1">
+        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
+          <span class="text-white text-xs font-bold">王</span>
+        </div>
+        <button class="text-xs font-medium text-gray-500 border border-gray-200 rounded-lg px-2.5 py-1 hover:bg-gray-50 transition-colors">尚未实名</button>
       </div>
-    </div>
-
-    <div class="ml-auto flex items-center gap-1.5">
-      <button onclick="toggleVerPanel()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors">
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        版本记录 <span class="bg-gray-100 text-gray-500 px-1 py-0.5 rounded text-[10px] font-semibold ml-0.5">3</span>
-      </button>
-      <button class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors">
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-        导出
-      </button>
-      <button class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#4285F4] hover:bg-blue-500 rounded-lg transition-colors shadow-sm">
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-        已保存
-      </button>
     </div>
   </header>
 
-  <div class="flex flex-1 overflow-hidden">
+  <!-- ══ VIEWS ══ -->
+  <div class="flex-1 overflow-hidden relative">
 
-    <!-- Chat panel -->
-    <div class="w-[320px] flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
-      <div class="px-4 py-2.5 border-b border-gray-50 flex items-center gap-2">
-        <div class="w-1.5 h-1.5 rounded-full bg-green-400"></div>
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">AI 对话</p>
-      </div>
+    <!-- ── HOME ── -->
+    <div id="view-home" class="view active absolute inset-0 flex-col overflow-y-auto">
+      <div class="max-w-[860px] mx-auto w-full px-8 py-12 flex flex-col items-center">
 
-      <div id="chat-msgs" class="flex-1 overflow-y-auto p-4 space-y-4">
-        <div class="msg-in flex justify-end">
-          <div>
-            <div class="bg-[#4285F4] text-white text-sm rounded-2xl rounded-tr-sm px-3.5 py-2.5 leading-relaxed max-w-[240px]">
-              请帮我起草2025年第一季度工作总结，重点包括：人员培训情况、信息化建设进展、重点项目推进，字数约1500字。
+        <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">一句话交代 &nbsp;
+          <span class="inline-flex items-center gap-1">💬</span>
+          &nbsp;一整套交付
+        </h1>
+        <p class="text-sm text-gray-400 mb-8">为政府机关与职场人打造的 AI 写作平台</p>
+
+        <!-- Input area -->
+        <div class="w-full bg-white rounded-2xl shadow-sm border border-gray-200 mb-8 overflow-hidden">
+          <textarea rows="3" placeholder="请输入内容开始写作，如：帮我起草2025年第一季度工作总结，重点包括人员培训、信息化建设进展..."
+            class="w-full px-5 pt-4 pb-2 text-sm text-gray-700 placeholder-gray-400 outline-none resize-none leading-relaxed"></textarea>
+          <div class="flex items-center px-4 py-3 border-t border-gray-100 gap-2">
+            <button class="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-[#4A6CF7] transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            </button>
+            <button class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-[#4A6CF7] px-2.5 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors border border-gray-200">
+              ⚡ 快速模式
+              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <button onclick="showView('stylelib')" class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-[#4A6CF7] px-2.5 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors border border-gray-200">
+              🎨 文风助手库
+              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div class="ml-auto">
+              <button onclick="showView('writer')" class="w-8 h-8 bg-[#4A6CF7] rounded-xl flex items-center justify-center hover:bg-indigo-600 transition-colors shadow-sm">
+                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+              </button>
             </div>
-            <p class="text-right text-[11px] text-gray-300 mt-1 mr-1">09:32</p>
           </div>
         </div>
 
-        <div class="msg-in flex items-start gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-[#4285F4] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
-            <span class="text-white text-[10px] font-bold">M</span>
-          </div>
-          <div>
-            <div class="bg-gray-50 text-gray-700 text-sm rounded-2xl rounded-tl-sm px-3.5 py-2.5 leading-relaxed max-w-[230px]">
-              已调用「季度汇报风格」助手，为您生成工作总结，请在右侧查看。如需调整请继续告知。
-            </div>
-            <p class="text-[11px] text-gray-300 mt-1 ml-1">09:32</p>
-          </div>
-        </div>
-
-        <div class="msg-in flex justify-end">
-          <div>
-            <div class="bg-[#4285F4] text-white text-sm rounded-2xl rounded-tr-sm px-3.5 py-2.5 leading-relaxed max-w-[240px]">
-              信息化建设那段再加一些具体的数据成果
-            </div>
-            <p class="text-right text-[11px] text-gray-300 mt-1 mr-1">09:45</p>
-          </div>
-        </div>
-
-        <div class="msg-in flex items-start gap-2.5">
-          <div class="w-6 h-6 rounded-full bg-[#4285F4] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
-            <span class="text-white text-[10px] font-bold">M</span>
-          </div>
-          <div>
-            <div class="bg-gray-50 text-gray-700 text-sm rounded-2xl rounded-tl-sm px-3.5 py-2.5 leading-relaxed max-w-[230px]">
-              已补充信息化数据：上线系统 3 套，无纸化率 87%，审批时限压缩至 3.2 个工作日。
-            </div>
-            <p class="text-[11px] text-gray-300 mt-1 ml-1">09:46</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="p-3 border-t border-gray-100">
-        <div class="flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus-within:border-[#4285F4] focus-within:ring-2 focus-within:ring-blue-50 transition-all">
-          <textarea id="chat-input" rows="2" placeholder="继续告诉我如何修改..."
-            class="flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-400 resize-none outline-none leading-relaxed"></textarea>
-          <button onclick="sendMsg()" class="w-7 h-7 bg-[#4285F4] rounded-lg flex items-center justify-center flex-shrink-0 hover:bg-blue-500 active:scale-95 transition-all shadow-sm">
-            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+        <!-- Tabs -->
+        <div class="flex items-center gap-2 mb-8 flex-wrap justify-center">
+          <button class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-[#4A6CF7] bg-indigo-50 rounded-xl">✍️ 写作</button>
+          <button class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 rounded-xl hover:bg-gray-100">🔬 深度研究</button>
+          <button class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 rounded-xl hover:bg-gray-100">📊 AI PPT</button>
+          <button class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 rounded-xl hover:bg-gray-100">📋 会议纪要</button>
+          <button onclick="showView('elevation')" class="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-amber-600 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors">
+            ⭐ 升华引用 <span class="new-badge">新</span>
           </button>
         </div>
-        <p class="text-[11px] text-gray-300 text-center mt-2">Enter 发送 · Shift+Enter 换行</p>
-      </div>
-    </div>
 
-    <!-- Document panel -->
-    <div class="flex-1 flex flex-col overflow-hidden bg-[#F7F8FA]">
-
-      <!-- Aux toolbar -->
-      <div class="h-12 bg-white border-b border-gray-100 flex items-center px-5 gap-2 flex-shrink-0">
-        <span class="text-[11px] font-semibold text-gray-300 uppercase tracking-widest mr-1">辅助</span>
-        <button onclick="applyAux('polish')" class="aux-btn flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white">
-          ✨ 润色
-        </button>
-        <button onclick="applyAux('elevate')" class="aux-btn flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white">
-          📜 升华
-        </button>
-        <button onclick="applyAux('proofread')" class="aux-btn flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white">
-          🔍 校对
-        </button>
-        <button onclick="applyAux('layout')" class="aux-btn flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white">
-          📐 排版
-        </button>
-        <div class="ml-auto flex items-center gap-3 text-[11px] text-gray-400">
-          <span>字数：1,247</span>
-          <span class="text-gray-200">|</span>
-          <span>已存 <strong class="text-gray-500">3</strong> 个快照</span>
-        </div>
-      </div>
-
-      <!-- Paper -->
-      <div class="flex-1 overflow-y-auto p-8">
-        <div class="max-w-[720px] mx-auto paper rounded-xl px-16 py-14 select-text" id="doc-body">
-          <h1 class="text-[18px] font-bold text-center text-gray-900 mb-1.5">2025年第一季度工作总结</h1>
-          <p class="text-xs text-center text-gray-400 mb-10">某市政府办公室 &nbsp;·&nbsp; 2025年4月</p>
-
-          <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]">2025年第一季度，我办公室在局党委的坚强领导下，围绕年度重点工作部署，以推进治理体系和治理能力现代化为目标导向，扎实推进各项工作任务落地落实，较好完成了季度既定目标。现将主要工作情况汇报如下。</p>
-
-          <h2 class="text-[15px] font-semibold text-gray-900 mt-8 mb-3">一、人员教育培训工作扎实推进</h2>
-          <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]">本季度，我办公室高度重视干部队伍建设，坚持把学习教育贯穿全过程。累计组织政治理论学习 <strong>12 次</strong>，参学人数达 <strong>276 人次</strong>；举办业务技能培训班 <strong>3 期</strong>，重点围绕公文写作规范、数字政务操作、廉政风险防控等内容展开，培训覆盖率达 <strong>100%</strong>。在学习形式上，注重将集中学习与自主学习相结合，切实提升了干部队伍的整体素质和业务能力。</p>
-
-          <h2 class="text-[15px] font-semibold text-gray-900 mt-8 mb-3">二、信息化建设工作取得阶段性成果</h2>
-          <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]">全力推进"数字政务"建设，一季度共上线政务服务系统 <strong>3 套</strong>，电子档案管理平台完成二期建设并正式投入使用，实现了文件流转无纸化覆盖率 <strong>87%</strong>，较上年同期提升 23 个百分点。行政审批办理时限平均压缩至 <strong>3.2 个工作日</strong>，群众满意度测评达 <strong>96.8%</strong>。</p>
-          <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]"><span class="quote-mark">正如习近平总书记深刻指出，"没有信息化就没有现代化"（《习近平关于网络强国论述摘编》）</span>，我办公室将持续以信息化为核心抓手，推动行政效能大幅提升，为群众提供更加便捷高效的政务服务。</p>
-
-          <h2 class="text-[15px] font-semibold text-gray-900 mt-8 mb-3">三、重点项目推进有力有序</h2>
-          <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]">一季度共承接重点项目推进工作 <strong>7 项</strong>，按期完成 <strong>5 项</strong>，2 项正按序时进度推进。其中，行政审批中心标准化建设项目已完成主体工程，进入装修收尾阶段，预计二季度正式投入使用。<span class="quote-mark">《论语·子路》有云："名不正则言不顺，言不顺则事不成。"</span>我办公室在项目推进中，始终坚持规范管理、有序推进，确保各项工作既合规又高效。</p>
-
-          <h2 class="text-[15px] font-semibold text-gray-900 mt-8 mb-3">四、下一步工作计划</h2>
-          <p class="text-sm leading-[2.1] text-gray-700 indent-[2em]">二季度，我办公室将继续深入贯彻落实局党委决策部署，重点做好以下工作：一是持续深化干部教育培训，计划组织 2 次专题培训；二是全力推进数字政务系统优化升级；三是做好重点项目的跟踪督办和验收收尾；四是切实提升政务服务质量，力争群众满意度持续稳定在高位。</p>
-
-          <!-- Proofread results -->
-          <div id="proof-panel" class="hidden mt-8 pt-6 border-t border-gray-100">
-            <p class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <span class="w-5 h-5 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-xs font-bold">!</span>
-              校对建议（共 2 处）
-            </p>
-            <div class="space-y-2" id="proof-list">
-              <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                <span class="text-[11px] bg-amber-200 text-amber-700 px-1.5 py-0.5 rounded-md font-semibold flex-shrink-0">标点</span>
-                <div class="flex-1 text-sm text-gray-600">建议将第三段分号前"<span class="text-red-400 line-through">，</span>"改为"<span class="text-green-600 font-medium">；</span>"，层次更清晰。</div>
-                <div class="flex gap-1.5 flex-shrink-0">
-                  <button onclick="acceptProof(this)" class="text-xs px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium">接受</button>
-                  <button onclick="ignoreProof(this)" class="text-xs px-2 py-1 text-gray-400 hover:text-gray-600 font-medium">忽略</button>
-                </div>
-              </div>
-              <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                <span class="text-[11px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-md font-semibold flex-shrink-0">表达</span>
-                <div class="flex-1 text-sm text-gray-600">建议将"<span class="text-red-400 line-through">做好</span>"替换为"<span class="text-green-600 font-medium">切实推进</span>"，更符合公文用语规范。</div>
-                <div class="flex gap-1.5 flex-shrink-0">
-                  <button onclick="acceptProof(this)" class="text-xs px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 font-medium">接受</button>
-                  <button onclick="ignoreProof(this)" class="text-xs px-2 py-1 text-gray-400 hover:text-gray-600 font-medium">忽略</button>
-                </div>
+        <!-- Agent cards -->
+        <p class="text-sm font-semibold text-gray-700 mb-4 self-start">写作专家团队，为您精修每一篇文章</p>
+        <div class="grid grid-cols-3 gap-4 w-full">
+          <div class="card-hover bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer" onclick="showView('writer')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-xl">✍️</div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800">写作达人</p>
+                <p class="text-xs text-gray-400">写作专家 · 内容生成专家</p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Version panel (slides in from right) -->
-  <div id="ver-panel" class="ver-panel absolute right-0 top-14 bottom-0 w-[268px] bg-white border-l border-gray-100 flex flex-col z-20 shadow-2xl">
-    <div class="h-12 flex items-center justify-between px-4 border-b border-gray-100">
-      <p class="text-sm font-semibold text-gray-800">版本记录</p>
-      <button onclick="toggleVerPanel()" class="text-gray-400 hover:text-gray-700 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="flex-1 overflow-y-auto p-4 space-y-2.5">
-      <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl">
-        <div class="flex items-center justify-between mb-0.5">
-          <span class="text-xs font-semibold text-blue-600">当前版本</span>
-          <span class="text-[11px] text-blue-400">09:46</span>
-        </div>
-        <p class="text-xs text-blue-500 mt-0.5">执行「校对」前快照</p>
-      </div>
-      <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 cursor-pointer transition-colors">
-        <div class="flex items-center justify-between mb-0.5">
-          <span class="text-xs font-semibold text-gray-600">快照 2</span>
-          <span class="text-[11px] text-gray-400">09:44</span>
-        </div>
-        <p class="text-xs text-gray-400 mt-0.5">执行「升华」前快照</p>
-        <button onclick="showToast('已回退到快照 2','success')" class="mt-2 text-xs text-[#4285F4] hover:underline font-medium">回退到此版本</button>
-      </div>
-      <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 cursor-pointer transition-colors">
-        <div class="flex items-center justify-between mb-0.5">
-          <span class="text-xs font-semibold text-gray-600">快照 1</span>
-          <span class="text-[11px] text-gray-400">09:38</span>
-        </div>
-        <p class="text-xs text-gray-400 mt-0.5">执行「润色」前快照</p>
-        <button onclick="showToast('已回退到快照 1','success')" class="mt-2 text-xs text-[#4285F4] hover:underline font-medium">回退到此版本</button>
-      </div>
-    </div>
-    <div class="px-4 py-3 border-t border-gray-100">
-      <p class="text-[11px] text-gray-400 text-center">最多保留最近 3 个快照</p>
-    </div>
-  </div>
-</div><!-- /view-write -->
-
-<!-- ───────────────────────────────────────────────
-     VIEW: ASSISTANT LIBRARY
-─────────────────────────────────────────────── -->
-<div id="view-assistants" class="view flex-col flex-1 overflow-hidden">
-  <header class="h-14 bg-white border-b border-gray-100 flex items-center px-8 flex-shrink-0">
-    <div>
-      <h1 class="text-base font-semibold text-gray-900">写作助手库</h1>
-      <p class="text-[11px] text-gray-400 mt-0.5">训练专属文风，让 AI 写出你的风格</p>
-    </div>
-    <button onclick="openModal()" class="ml-auto flex items-center gap-2 px-4 py-2 bg-[#4285F4] text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition-colors shadow-sm">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-      新建助手
-    </button>
-  </header>
-
-  <div class="flex-1 overflow-y-auto p-8">
-    <div class="grid grid-cols-3 gap-5 max-w-[900px]">
-
-      <!-- Card 1: Ready -->
-      <div class="assistant-card bg-white rounded-2xl border border-gray-100 p-5" onclick="showView('detail')">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-xl">📊</div>
-          <span class="text-[11px] font-semibold bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full">就绪</span>
-        </div>
-        <h3 class="font-semibold text-sm text-gray-900 mb-1">季度汇报风格</h3>
-        <p class="text-xs text-gray-400 leading-relaxed mb-4">面向上级领导的季度汇报，偏向数据陈述与成果呈现</p>
-        <div class="flex items-center gap-2 text-[11px] text-gray-400 mb-4">
-          <span>5 篇训练文章</span><span class="text-gray-200">·</span><span>3 天前使用</span>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="event.stopPropagation();showView('write');showToast('已切换至「季度汇报风格」','success')" class="flex-1 py-1.5 text-xs font-semibold text-white bg-[#4285F4] rounded-lg hover:bg-blue-500 transition-colors">使用</button>
-          <button onclick="event.stopPropagation();showView('detail')" class="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">详情</button>
-        </div>
-      </div>
-
-      <!-- Card 2: Ready -->
-      <div class="assistant-card bg-white rounded-2xl border border-gray-100 p-5">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-xl">📢</div>
-          <span class="text-[11px] font-semibold bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full">就绪</span>
-        </div>
-        <h3 class="font-semibold text-sm text-gray-900 mb-1">对外公开文章</h3>
-        <p class="text-xs text-gray-400 leading-relaxed mb-4">面向社会公众的政务文章，语言平易近人、逻辑清晰</p>
-        <div class="flex items-center gap-2 text-[11px] text-gray-400 mb-4">
-          <span>3 篇训练文章</span><span class="text-gray-200">·</span><span>1 周前使用</span>
-        </div>
-        <div class="flex gap-2">
-          <button class="flex-1 py-1.5 text-xs font-semibold text-white bg-[#4285F4] rounded-lg hover:bg-blue-500 transition-colors">使用</button>
-          <button class="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">详情</button>
-        </div>
-      </div>
-
-      <!-- Card 3: Training -->
-      <div class="assistant-card bg-white rounded-2xl border border-gray-100 p-5">
-        <div class="flex items-start justify-between mb-4">
-          <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-xl">🎤</div>
-          <span class="text-[11px] font-semibold bg-amber-50 text-amber-600 border border-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>训练中
-          </span>
-        </div>
-        <h3 class="font-semibold text-sm text-gray-900 mb-1">领导讲话稿</h3>
-        <p class="text-xs text-gray-400 leading-relaxed mb-3">重大活动、会议致辞，激励性表达与理论高度兼备</p>
-        <div class="mb-4">
-          <div class="flex justify-between text-[11px] text-gray-400 mb-1.5">
-            <span>分析修辞特征中...</span><span class="font-medium text-amber-500">67%</span>
-          </div>
-          <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div class="h-full shimmer rounded-full" style="width:67%"></div>
-          </div>
-        </div>
-        <button class="w-full py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">等待训练完成</button>
-      </div>
-
-      <!-- New card -->
-      <div onclick="openModal()" class="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-5 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-[#4285F4] hover:bg-blue-50 transition-all group min-h-[200px]">
-        <div class="w-10 h-10 rounded-xl bg-gray-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
-          <svg class="w-5 h-5 text-gray-400 group-hover:text-[#4285F4] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-        </div>
-        <p class="text-sm font-medium text-gray-400 group-hover:text-[#4285F4] transition-colors">新建写作助手</p>
-        <p class="text-xs text-gray-300 group-hover:text-blue-400 transition-colors">上传文章，训练专属文风</p>
-      </div>
-    </div>
-  </div>
-</div><!-- /view-assistants -->
-
-<!-- ───────────────────────────────────────────────
-     VIEW: ASSISTANT DETAIL
-─────────────────────────────────────────────── -->
-<div id="view-detail" class="view flex-col flex-1 overflow-hidden">
-  <header class="h-14 bg-white border-b border-gray-100 flex items-center px-8 flex-shrink-0">
-    <button onclick="showView('assistants')" class="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-800 mr-6 transition-colors">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-      助手库
-    </button>
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-base">📊</div>
-      <div>
-        <h1 class="text-base font-semibold text-gray-900">季度汇报风格</h1>
-        <p class="text-[11px] text-gray-400 mt-0.5">5 篇训练文章 &nbsp;·&nbsp; 最近使用：3 天前</p>
-      </div>
-      <span class="text-[11px] font-semibold bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full ml-1">就绪</span>
-    </div>
-    <div class="ml-auto flex items-center gap-2">
-      <button class="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">追加训练文章</button>
-      <button onclick="showView('write');showToast('已切换至「季度汇报风格」','success')" class="px-4 py-1.5 text-xs font-semibold text-white bg-[#4285F4] rounded-lg hover:bg-blue-500 transition-colors shadow-sm">使用此助手</button>
-    </div>
-  </header>
-
-  <!-- Tabs -->
-  <div class="bg-white border-b border-gray-100 px-8">
-    <div class="flex gap-6">
-      <button data-tab="style" onclick="switchTab(this,'style')" class="tab-btn py-3 text-sm font-medium text-[#4285F4] border-b-2 border-[#4285F4] transition-colors">文风报告</button>
-      <button data-tab="articles" onclick="switchTab(this,'articles')" class="tab-btn py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition-colors">训练文章（5）</button>
-      <button data-tab="trial" onclick="switchTab(this,'trial')" class="tab-btn py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition-colors">试写示例</button>
-    </div>
-  </div>
-
-  <div class="flex-1 overflow-y-auto p-8">
-    <!-- Tab: Style report -->
-    <div id="tab-style" class="tab-pane active max-w-[900px]">
-      <div class="grid grid-cols-3 gap-6">
-        <div class="bg-white rounded-2xl border border-gray-100 p-6">
-          <h3 class="text-sm font-semibold text-gray-800 mb-4">文风雷达图</h3>
-          <div style="height:200px;position:relative;">
-            <canvas id="radarChart"></canvas>
-          </div>
-        </div>
-
-        <div class="col-span-2 space-y-4">
-          <!-- Persona -->
-          <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                <span class="w-5 h-5 bg-blue-50 text-blue-500 rounded-md flex items-center justify-center text-xs">👤</span>用户画像
-              </h3>
-              <button class="text-xs text-gray-400 hover:text-[#4285F4] transition-colors">编辑</button>
-            </div>
-            <div class="grid grid-cols-3 gap-2.5">
-              <div class="bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 mb-1">行业领域</p><p class="text-sm font-semibold text-gray-800">政府机关</p></div>
-              <div class="bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 mb-1">职位层级</p><p class="text-sm font-semibold text-gray-800">中层管理干部</p></div>
-              <div class="bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 mb-1">目标读者</p><p class="text-sm font-semibold text-gray-800">上级领导</p></div>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="tag bg-gray-100 text-gray-500">大纲写作</span>
+              <span class="tag bg-gray-100 text-gray-500">极速写作</span>
+              <span class="tag bg-gray-100 text-gray-500">公文写作</span>
             </div>
           </div>
-
-          <!-- Writing style -->
-          <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                <span class="w-5 h-5 bg-purple-50 text-purple-500 rounded-md flex items-center justify-center text-xs">✍️</span>写作风格
-              </h3>
-              <button class="text-xs text-gray-400 hover:text-[#4285F4] transition-colors">编辑</button>
+          <div class="card-hover bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center text-xl">📋</div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800">统筹专家</p>
+                <p class="text-xs text-gray-400">任务管理专家</p>
+              </div>
             </div>
-            <div class="grid grid-cols-3 gap-2.5">
-              <div class="bg-gray-50 rounded-xl p-3">
-                <p class="text-[11px] text-gray-400 mb-2">正式度</p>
-                <div class="flex items-center gap-1.5">
-                  <div class="flex gap-0.5">
-                    <div class="w-4 h-2 bg-[#4285F4] rounded-sm"></div>
-                    <div class="w-4 h-2 bg-[#4285F4] rounded-sm"></div>
-                    <div class="w-4 h-2 bg-[#4285F4] rounded-sm"></div>
-                    <div class="w-4 h-2 bg-[#4285F4] rounded-sm opacity-70"></div>
-                    <div class="w-4 h-2 bg-gray-200 rounded-sm"></div>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="tag bg-gray-100 text-gray-500">需求拆解</span>
+              <span class="tag bg-gray-100 text-gray-500">任务规划</span>
+            </div>
+          </div>
+          <div class="card-hover bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-green-100 flex items-center justify-center text-xl">🔍</div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800">检索专家</p>
+                <p class="text-xs text-gray-400">精准信息收集专家</p>
+              </div>
+            </div>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="tag bg-gray-100 text-gray-500">信息收集</span>
+              <span class="tag bg-gray-100 text-gray-500">自动判别</span>
+            </div>
+          </div>
+          <div class="card-hover bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-xl">📚</div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800">文献阅读师</p>
+                <p class="text-xs text-gray-400">专业文献处理与知识提取助手</p>
+              </div>
+            </div>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="tag bg-gray-100 text-gray-500">信息收集</span>
+              <span class="tag bg-gray-100 text-gray-500">自动判别</span>
+            </div>
+          </div>
+          <div class="card-hover bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-xl">🔬</div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800">研究员</p>
+                <p class="text-xs text-gray-400">深度研究专家</p>
+              </div>
+            </div>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="tag bg-gray-100 text-gray-500">深度研究</span>
+              <span class="tag bg-gray-100 text-gray-500">数据分析</span>
+            </div>
+          </div>
+          <!-- New: Elevation agent card -->
+          <div class="card-hover bg-white rounded-2xl border border-amber-200 p-4 cursor-pointer" onclick="showView('elevation')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-xl">⭐</div>
+              <div>
+                <p class="text-sm font-semibold text-gray-800">升华引用师 <span class="new-badge">新</span></p>
+                <p class="text-xs text-gray-400">经典与党政文献引用专家</p>
+              </div>
+            </div>
+            <div class="flex gap-1.5 flex-wrap">
+              <span class="tag bg-amber-50 text-amber-600">经典引用</span>
+              <span class="tag bg-amber-50 text-amber-600">党政文献</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WRITER ── -->
+    <div id="view-writer" class="view absolute inset-0 flex-col overflow-hidden">
+      <!-- Writer top bar -->
+      <div class="h-12 bg-white border-b border-gray-100 flex items-center px-5 gap-3 flex-shrink-0">
+        <h1 class="text-sm font-semibold text-gray-800 truncate max-w-xs">2025年第一季度工作总结</h1>
+        <button onclick="showView('stylelib')" class="flex items-center gap-1.5 ml-2 px-2.5 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors">
+          <span class="w-2 h-2 rounded-full bg-green-400"></span>季度汇报风格
+          <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+
+        <div class="ml-auto flex items-center gap-1.5">
+          <!-- NEW: Aux buttons (升华/润色/校对/排版) -->
+          <div class="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-xl px-1 py-1">
+            <button onclick="applyAux('polish')" title="润色" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-600 rounded-lg hover:bg-white hover:text-[#4A6CF7] hover:shadow-sm transition-all">✨ 润色</button>
+            <button onclick="applyAux('elevate')" title="升华" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-amber-600 bg-amber-50 rounded-lg hover:bg-white hover:shadow-sm transition-all">⭐ 升华 <span class="new-badge">新</span></button>
+            <button onclick="applyAux('proofread')" title="校对" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-600 rounded-lg hover:bg-white hover:text-[#4A6CF7] hover:shadow-sm transition-all">🔍 校对</button>
+            <button onclick="applyAux('layout')" title="排版" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-600 rounded-lg hover:bg-white hover:text-[#4A6CF7] hover:shadow-sm transition-all">📐 排版 <span class="new-badge">新</span></button>
+          </div>
+
+          <button onclick="toggleVerPanel()" class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            版本 <span class="bg-[#4A6CF7] text-white text-[10px] font-bold px-1 py-0.5 rounded ml-0.5">3</span>
+            <span class="new-badge">新</span>
+          </button>
+          <button class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#4A6CF7] rounded-lg hover:bg-indigo-600 transition-colors shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            已保存
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-1 overflow-hidden">
+        <!-- Chat -->
+        <div class="w-[300px] flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
+          <div class="px-4 py-2.5 border-b border-gray-50">
+            <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">AI 对话</p>
+          </div>
+          <div id="chat-list" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div class="msg-in flex justify-end">
+              <div>
+                <div class="bg-[#4A6CF7] text-white text-sm rounded-2xl rounded-tr-sm px-3.5 py-2.5 leading-relaxed max-w-[220px]">请帮我起草2025年第一季度工作总结，重点包括人员培训、信息化建设、重点项目推进。</div>
+                <p class="text-right text-[11px] text-gray-300 mt-1 mr-1">09:32</p>
+              </div>
+            </div>
+            <div class="msg-in flex items-start gap-2.5">
+              <div class="w-6 h-6 rounded-full bg-[#4A6CF7] flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span class="text-white text-[10px] font-bold">M</span>
+              </div>
+              <div>
+                <div class="bg-gray-50 text-gray-700 text-sm rounded-2xl rounded-tl-sm px-3.5 py-2.5 leading-relaxed max-w-[210px]">已调用「季度汇报风格」助手生成工作总结，请在右侧查看。</div>
+                <p class="text-[11px] text-gray-300 mt-1 ml-1">09:32</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-3 border-t border-gray-100">
+            <div class="flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 focus-within:border-[#4A6CF7] focus-within:ring-2 focus-within:ring-indigo-50 transition-all">
+              <textarea id="chat-input" rows="2" placeholder="继续告诉我如何修改..." class="flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-400 resize-none outline-none leading-relaxed"></textarea>
+              <button onclick="sendMsg()" class="w-7 h-7 bg-[#4A6CF7] rounded-xl flex items-center justify-center flex-shrink-0 hover:bg-indigo-600 transition-colors">
+                <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Document -->
+        <div class="flex-1 overflow-y-auto bg-[#F5F6FA] p-8 relative">
+          <!-- Word count bar -->
+          <div class="max-w-[680px] mx-auto mb-3 flex items-center justify-between">
+            <p class="text-xs text-gray-400">字数：1,247</p>
+            <p class="text-xs text-gray-400">已保存 <strong class="text-gray-500">3</strong> 个版本快照</p>
+          </div>
+          <div class="max-w-[680px] mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 px-14 py-12 select-text" id="doc-content">
+            <h1 class="text-[18px] font-bold text-center text-gray-900 mb-1.5">2025年第一季度工作总结</h1>
+            <p class="text-xs text-center text-gray-400 mb-10">某市政府办公室 &nbsp;·&nbsp; 2025年4月</p>
+
+            <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]">2025年第一季度，我办公室在局党委的坚强领导下，扎实推进各项工作任务落地落实，较好完成了季度既定目标。</p>
+
+            <h2 class="text-[15px] font-semibold text-gray-900 mt-7 mb-3">一、人员教育培训工作扎实推进</h2>
+            <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]">本季度累计组织政治理论学习 <strong>12 次</strong>，参学 <strong>276 人次</strong>；举办业务技能培训班 <strong>3 期</strong>，培训覆盖率达 <strong>100%</strong>。</p>
+
+            <h2 class="text-[15px] font-semibold text-gray-900 mt-7 mb-3">二、信息化建设取得阶段性成果</h2>
+            <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]">一季度共上线政务系统 <strong>3 套</strong>，无纸化覆盖率 <strong>87%</strong>，审批时限压缩至 <strong>3.2 个工作日</strong>。</p>
+            <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]"><span class="quote-hl">正如习近平总书记指出，"没有信息化就没有现代化"（《习近平关于网络强国论述摘编》）</span>，我办公室将持续以信息化为抓手推动行政效能提升。</p>
+
+            <h2 class="text-[15px] font-semibold text-gray-900 mt-7 mb-3">三、重点项目推进有力有序</h2>
+            <p class="text-sm leading-[2.1] text-gray-700 mb-4 indent-[2em]">一季度承接重点项目 <strong>7 项</strong>，按期完成 <strong>5 项</strong>。<span class="quote-hl">《论语·子路》云："名不正则言不顺，言不顺则事不成。"</span>我办公室始终坚持规范管理，确保各项工作既合规又高效。</p>
+
+            <!-- Proofread panel -->
+            <div id="proof-panel" class="hidden mt-8 pt-6 border-t border-gray-100">
+              <p class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="w-5 h-5 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center text-xs font-bold">!</span>
+                校对建议（2 处）
+              </p>
+              <div id="proof-list" class="space-y-2">
+                <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                  <span class="text-[11px] bg-amber-200 text-amber-700 px-1.5 py-0.5 rounded font-bold flex-shrink-0">标点</span>
+                  <div class="flex-1 text-sm text-gray-600">建议将"<span class="text-red-400 line-through">，</span>"改为"<span class="text-green-600 font-medium">；</span>"，层次更清晰。</div>
+                  <div class="flex gap-1 flex-shrink-0">
+                    <button onclick="this.closest('.flex.items-start').remove()" class="text-xs px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-lg font-medium">接受</button>
+                    <button onclick="this.closest('.flex.items-start').remove()" class="text-xs px-2 py-1 text-gray-400 hover:text-gray-600 font-medium">忽略</button>
                   </div>
-                  <span class="text-xs font-bold text-gray-700">4/5</span>
+                </div>
+                <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                  <span class="text-[11px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-bold flex-shrink-0">表达</span>
+                  <div class="flex-1 text-sm text-gray-600">建议将"<span class="text-red-400 line-through">做好</span>"改为"<span class="text-green-600 font-medium">切实推进</span>"，更符合公文规范。</div>
+                  <div class="flex gap-1 flex-shrink-0">
+                    <button onclick="this.closest('.flex.items-start').remove()" class="text-xs px-2 py-1 bg-white border border-gray-200 text-gray-600 rounded-lg font-medium">接受</button>
+                    <button onclick="this.closest('.flex.items-start').remove()" class="text-xs px-2 py-1 text-gray-400 hover:text-gray-600 font-medium">忽略</button>
+                  </div>
                 </div>
               </div>
-              <div class="bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 mb-1">叙述视角</p><p class="text-sm font-semibold text-gray-800">第一人称</p></div>
-              <div class="bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 mb-1">逻辑结构</p><p class="text-sm font-semibold text-gray-800">总 — 分 — 总</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Version panel (slide from right) -->
+      <div id="ver-panel" class="ver-panel absolute right-0 top-12 bottom-0 w-[256px] bg-white border-l border-gray-100 flex flex-col z-30 shadow-2xl">
+        <div class="h-11 flex items-center justify-between px-4 border-b border-gray-100">
+          <p class="text-sm font-semibold text-gray-800">版本快照</p>
+          <button onclick="toggleVerPanel()" class="text-gray-400 hover:text-gray-600 w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-2.5">
+          <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-bold text-indigo-600">当前版本</span>
+              <span class="text-[11px] text-indigo-400">09:46</span>
+            </div>
+            <p class="text-xs text-indigo-500">执行「校对」前快照</p>
+          </div>
+          <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 cursor-pointer transition-colors">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-gray-600">快照 2</span>
+              <span class="text-[11px] text-gray-400">09:44</span>
+            </div>
+            <p class="text-xs text-gray-400">执行「升华」前快照</p>
+            <button onclick="showToast('已回退到快照 2','success')" class="mt-1.5 text-xs text-[#4A6CF7] hover:underline font-medium">回退到此版本</button>
+          </div>
+          <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 cursor-pointer transition-colors">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-gray-600">快照 1</span>
+              <span class="text-[11px] text-gray-400">09:38</span>
+            </div>
+            <p class="text-xs text-gray-400">执行「润色」前快照</p>
+            <button onclick="showToast('已回退到快照 1','success')" class="mt-1.5 text-xs text-[#4A6CF7] hover:underline font-medium">回退到此版本</button>
+          </div>
+        </div>
+        <div class="px-4 py-3 border-t border-gray-100">
+          <p class="text-[11px] text-gray-400 text-center">最多保留最近 3 个快照</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ELEVATION (NEW) ── -->
+    <div id="view-elevation" class="view absolute inset-0 flex-col overflow-y-auto bg-[#F5F6FA]">
+      <div class="max-w-[900px] mx-auto w-full px-8 py-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center text-2xl">⭐</div>
+          <div>
+            <h1 class="text-lg font-bold text-gray-900 flex items-center gap-2">AI 升华引用 <span class="new-badge">新功能</span></h1>
+            <p class="text-sm text-gray-500 mt-0.5">将文章观点与经典典籍、党政文献智能关联，提升思想深度</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-5 mb-6">
+          <!-- Input -->
+          <div class="col-span-2 bg-white rounded-2xl border border-gray-100 p-5">
+            <p class="text-sm font-semibold text-gray-700 mb-3">粘贴需要升华的文段</p>
+            <textarea rows="6" class="w-full text-sm text-gray-700 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-50 resize-none leading-relaxed placeholder-gray-400 transition-all" placeholder="粘贴或输入你的文章段落，AI 将自动匹配经典语录并嵌入引文..."></textarea>
+            <div class="flex items-center justify-between mt-3">
+              <div class="flex items-center gap-2">
+                <p class="text-xs text-gray-500">引用来源：</p>
+                <button class="text-xs px-2.5 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg font-medium hover:bg-amber-100 transition-colors">经典典籍 ✓</button>
+                <button class="text-xs px-2.5 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg font-medium hover:bg-red-100 transition-colors">党政文献 ✓</button>
+              </div>
+              <button onclick="showToast('正在检索知识库，匹配最优引文…','info')" class="px-4 py-2 text-sm font-semibold text-white bg-amber-500 rounded-xl hover:bg-amber-600 transition-colors shadow-sm">立即升华</button>
             </div>
           </div>
 
-          <!-- Vocab habits -->
+          <!-- Knowledge base status -->
           <div class="bg-white rounded-2xl border border-gray-100 p-5">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                <span class="w-5 h-5 bg-green-50 text-green-500 rounded-md flex items-center justify-center text-xs">📝</span>用词习惯
-              </h3>
-              <button class="text-xs text-gray-400 hover:text-[#4285F4] transition-colors">编辑</button>
+            <p class="text-sm font-semibold text-gray-700 mb-4">知识库状态</p>
+            <div class="space-y-3">
+              <div class="p-3 bg-green-50 border border-green-100 rounded-xl">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="text-xs font-semibold text-green-700">先秦经典</p>
+                  <span class="text-[11px] text-green-500 font-medium">已就绪</span>
+                </div>
+                <p class="text-[11px] text-green-600">论语 · 孟子 · 道德经 · 大学 · 中庸</p>
+              </div>
+              <div class="p-3 bg-green-50 border border-green-100 rounded-xl">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="text-xs font-semibold text-green-700">党政文献</p>
+                  <span class="text-[11px] text-green-500 font-medium">部分就绪</span>
+                </div>
+                <p class="text-[11px] text-green-600">党章 · 历届重要会议文件</p>
+              </div>
+              <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                <div class="flex items-center justify-between mb-1">
+                  <p class="text-xs font-semibold text-amber-700">领导人论述</p>
+                  <span class="text-[11px] text-amber-500 font-medium flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>准备中
+                  </span>
+                </div>
+                <p class="text-[11px] text-amber-600">数据同步进行中，预计下期上线</p>
+              </div>
             </div>
-            <p class="text-[11px] text-gray-400 mb-2">高频专业词</p>
-            <div class="flex flex-wrap gap-1.5 mb-3">
-              <span class="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-md font-medium">扎实推进</span>
-              <span class="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-md font-medium">落地落实</span>
-              <span class="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-md font-medium">切实提升</span>
-              <span class="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-md font-medium">有序推进</span>
-              <span class="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-md font-medium">持续深化</span>
-              <span class="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-md font-medium">统筹协调</span>
+          </div>
+        </div>
+
+        <!-- Example output -->
+        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-sm font-semibold text-gray-700">示例效果</p>
+            <span class="text-xs text-gray-400">升华前 → 升华后</span>
+          </div>
+          <div class="grid grid-cols-2 gap-5">
+            <div class="bg-gray-50 rounded-xl p-4">
+              <p class="text-[11px] font-semibold text-gray-400 mb-3 uppercase tracking-wider">原文</p>
+              <p class="text-sm leading-[2] text-gray-700">我办公室在项目推进过程中，始终坚持规范管理、有序推进，确保各项工作既合规又高效。</p>
             </div>
-            <div class="grid grid-cols-3 gap-2">
-              <div class="bg-gray-50 rounded-xl p-2.5 text-xs"><p class="text-gray-400">平均句长</p><p class="font-bold text-gray-800 mt-0.5">28 字</p></div>
-              <div class="bg-gray-50 rounded-xl p-2.5 text-xs"><p class="text-gray-400">主动语态比</p><p class="font-bold text-gray-800 mt-0.5">78%</p></div>
-              <div class="bg-gray-50 rounded-xl p-2.5 text-xs"><p class="text-gray-400">文章节奏</p><p class="font-bold text-gray-800 mt-0.5">稳健匀速</p></div>
+            <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+              <p class="text-[11px] font-semibold text-amber-500 mb-3 uppercase tracking-wider">升华后</p>
+              <p class="text-sm leading-[2] text-gray-700">我办公室在项目推进过程中，始终坚持规范管理、有序推进，<span class="quote-hl">《论语·子路》有云："名不正则言不顺，言不顺则事不成"</span>，确保各项工作既合规又高效。</p>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Tab: Training articles -->
-    <div id="tab-articles" class="tab-pane max-w-[680px] space-y-3">
-      <div class="flex items-center justify-between mb-1">
-        <p class="text-sm text-gray-500">已上传 <strong class="text-gray-800">5</strong> 篇训练文章</p>
-        <span class="text-xs text-gray-400">还可添加 5 篇</span>
+    <!-- ── STYLE LIBRARY (UPGRADED) ── -->
+    <div id="view-stylelib" class="view absolute inset-0 flex-col overflow-hidden bg-[#F5F6FA]">
+      <div class="h-12 bg-white border-b border-gray-100 flex items-center px-6 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <button onclick="showView('home')" class="text-gray-400 hover:text-gray-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          </button>
+          <h1 class="text-sm font-semibold text-gray-800">文风助手库</h1>
+          <span class="text-xs text-gray-400 ml-1">· 升级版</span>
+        </div>
+        <button onclick="openModal()" class="ml-auto flex items-center gap-2 px-3.5 py-1.5 bg-[#4A6CF7] text-white text-xs font-semibold rounded-lg hover:bg-indigo-600 transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>新建助手
+        </button>
       </div>
-      <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4">
-        <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-800">2024年第四季度工作总结</p>
-          <p class="text-xs text-gray-400 mt-0.5">1,842 字 · 上传于 2025-03-20</p>
-        </div>
-        <button class="text-xs text-gray-300 hover:text-red-400 transition-colors px-2 py-1 font-medium">删除</button>
-      </div>
-      <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4">
-        <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-800">2024年度工作总结汇报</p>
-          <p class="text-xs text-gray-400 mt-0.5">2,315 字 · 上传于 2025-03-20</p>
-        </div>
-        <button class="text-xs text-gray-300 hover:text-red-400 transition-colors px-2 py-1 font-medium">删除</button>
-      </div>
-      <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4">
-        <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-800">关于行政效能提升的工作报告</p>
-          <p class="text-xs text-gray-400 mt-0.5">1,567 字 · 上传于 2025-03-21</p>
-        </div>
-        <button class="text-xs text-gray-300 hover:text-red-400 transition-colors px-2 py-1 font-medium">删除</button>
-      </div>
-      <div class="mt-2 p-4 border-2 border-dashed border-gray-200 rounded-xl text-center hover:border-[#4285F4] hover:bg-blue-50 transition-all cursor-pointer group">
-        <p class="text-sm text-gray-400 group-hover:text-[#4285F4] transition-colors font-medium">+ 追加训练文章</p>
-      </div>
-    </div>
 
-    <!-- Tab: Trial writing -->
-    <div id="tab-trial" class="tab-pane max-w-[680px]">
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-semibold text-gray-800">AI 试写示例</h3>
-          <span class="text-xs font-medium bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full">高度匹配</span>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-5 text-sm leading-[2.1] text-gray-700">
-          <p class="indent-[2em]">本季度工作在部门领导班子的统一部署下，按照年初制定的工作计划有序推进，各项重点任务均取得了阶段性成果，整体工作呈现出积极向好的发展态势，为完成全年目标任务奠定了坚实基础。</p>
-          <p class="mt-3 indent-[2em]">后续将进一步深化已有工作成效，持续加强内部协调配合，切实将各项部署要求落到实处，确保各项工作在规定时间节点内高质量完成，以实干实绩回应组织期望与群众关切。</p>
-        </div>
-      </div>
-      <div class="flex items-center justify-between">
-        <p class="text-sm text-gray-500">文风感觉如何？</p>
-        <div class="flex gap-2">
-          <button class="px-3 py-2 text-sm font-medium text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">不太像，重新训练</button>
-          <button class="px-3 py-2 text-sm font-medium text-[#4285F4] border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">重新生成示例</button>
-          <button onclick="showView('write');showToast('助手已激活，开始写作吧！','success')" class="px-4 py-2 text-sm font-semibold text-white bg-[#4285F4] rounded-lg hover:bg-blue-500 transition-colors shadow-sm">确认使用此助手</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div><!-- /view-detail -->
-
-<!-- ───────────────────────────────────────────────
-     VIEW: TEMPLATES
-─────────────────────────────────────────────── -->
-<div id="view-templates" class="view flex-col flex-1 overflow-hidden">
-  <header class="h-14 bg-white border-b border-gray-100 flex items-center px-8 flex-shrink-0">
-    <div>
-      <h1 class="text-base font-semibold text-gray-900">排版模板库</h1>
-      <p class="text-[11px] text-gray-400 mt-0.5">统一文稿视觉样式，一键套用格式</p>
-    </div>
-    <button class="ml-auto flex items-center gap-2 px-4 py-2 bg-[#4285F4] text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition-colors shadow-sm">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-      新建模板
-    </button>
-  </header>
-  <div class="flex-1 overflow-y-auto p-8 space-y-8">
-    <div>
-      <p class="text-[11px] font-semibold text-gray-300 uppercase tracking-widest mb-4">系统预置模板</p>
-      <div class="grid grid-cols-4 gap-4 max-w-[860px]">
-        <div class="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-blue-200 hover:shadow-md transition-all group">
-          <div class="h-28 bg-gray-50 group-hover:bg-blue-50 rounded-xl mb-3 p-3 flex flex-col gap-1.5 transition-colors">
-            <div class="skel h-3 w-3/4 mx-auto"></div>
-            <div class="skel h-1.5 w-full mt-1"></div>
-            <div class="skel h-1.5 w-full"></div>
-            <div class="skel h-2 w-1/2 mt-1"></div>
-            <div class="skel h-1.5 w-full"></div>
-            <div class="skel h-1.5 w-4/5"></div>
+      <div class="flex-1 overflow-y-auto p-6">
+        <div class="grid grid-cols-3 gap-4 max-w-[900px]">
+          <!-- Card 1 -->
+          <div class="card-hover bg-white rounded-2xl border border-gray-100 p-5 cursor-pointer" onclick="showView('styledetail')">
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-xl">📊</div>
+              <span class="text-[11px] font-bold bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full">就绪</span>
+            </div>
+            <h3 class="font-semibold text-sm text-gray-900 mb-1">季度汇报风格</h3>
+            <p class="text-xs text-gray-400 leading-relaxed mb-4">面向上级领导的季度汇报，偏向数据陈述与成果呈现</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-400 mb-4">
+              <span>5 篇文章</span><span class="text-gray-200">·</span><span>3 天前使用</span>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="event.stopPropagation();showView('writer');showToast('已切换至「季度汇报风格」','success')" class="flex-1 py-1.5 text-xs font-semibold text-white bg-[#4A6CF7] rounded-lg">使用</button>
+              <button class="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg">详情</button>
+            </div>
           </div>
-          <p class="text-xs font-semibold text-gray-800">通用公文</p>
-          <p class="text-[11px] text-gray-400 mt-0.5">仿宋正文 / 方正标题 / 1.5 倍行距</p>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-blue-200 hover:shadow-md transition-all group">
-          <div class="h-28 bg-gray-50 group-hover:bg-blue-50 rounded-xl mb-3 p-3 flex flex-col gap-1.5 transition-colors">
-            <div class="skel h-2.5 w-1/2"></div>
-            <div class="skel h-1.5 w-full mt-1"></div>
-            <div class="skel h-1.5 w-full"></div>
-            <div class="skel h-2.5 w-2/5 mt-1"></div>
-            <div class="skel h-1.5 w-full"></div>
-            <div class="skel h-1.5 w-4/5"></div>
+          <!-- Card 2 -->
+          <div class="card-hover bg-white rounded-2xl border border-gray-100 p-5 cursor-pointer">
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-xl">📢</div>
+              <span class="text-[11px] font-bold bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full">就绪</span>
+            </div>
+            <h3 class="font-semibold text-sm text-gray-900 mb-1">对外公开文章</h3>
+            <p class="text-xs text-gray-400 leading-relaxed mb-4">语言平易近人、逻辑清晰的对外政务文章</p>
+            <div class="flex items-center gap-2 text-[11px] text-gray-400 mb-4">
+              <span>3 篇文章</span><span class="text-gray-200">·</span><span>1 周前使用</span>
+            </div>
+            <div class="flex gap-2">
+              <button class="flex-1 py-1.5 text-xs font-semibold text-white bg-[#4A6CF7] rounded-lg">使用</button>
+              <button class="flex-1 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg">详情</button>
+            </div>
           </div>
-          <p class="text-xs font-semibold text-gray-800">工作汇报</p>
-          <p class="text-[11px] text-gray-400 mt-0.5">楷体正文 / 蓝色标题 / 1.8 倍</p>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-blue-200 hover:shadow-md transition-all group">
-          <div class="h-28 bg-gray-50 group-hover:bg-blue-50 rounded-xl mb-3 p-3 flex flex-col gap-1 transition-colors">
-            <div class="flex gap-2 mb-1"><div class="skel h-2 w-1/3"></div><div class="skel h-2 w-1/4"></div></div>
-            <div class="border-t border-gray-200 my-1"></div>
-            <div class="skel h-1.5 w-full"></div>
-            <div class="skel h-1.5 w-4/5"></div>
-            <div class="skel h-2 w-2/5 mt-1"></div>
-            <div class="skel h-1.5 w-full"></div>
+          <!-- Card 3: Training -->
+          <div class="card-hover bg-white rounded-2xl border border-gray-100 p-5 cursor-pointer">
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-xl">🎤</div>
+              <span class="text-[11px] font-bold bg-amber-50 text-amber-600 border border-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>训练中
+              </span>
+            </div>
+            <h3 class="font-semibold text-sm text-gray-900 mb-1">领导讲话稿</h3>
+            <p class="text-xs text-gray-400 leading-relaxed mb-3">重大活动、会议的领导致辞</p>
+            <div class="mb-4">
+              <div class="flex justify-between text-[11px] text-gray-400 mb-1">
+                <span>分析修辞特征中...</span><span class="font-semibold text-amber-500">67%</span>
+              </div>
+              <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full shimmer rounded-full" style="width:67%"></div>
+              </div>
+            </div>
+            <button class="w-full py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-lg cursor-not-allowed">等待训练完成</button>
           </div>
-          <p class="text-xs font-semibold text-gray-800">会议纪要</p>
-          <p class="text-[11px] text-gray-400 mt-0.5">简约风格 / 分隔线分区</p>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-blue-200 hover:shadow-md transition-all group">
-          <div class="h-28 bg-gray-50 group-hover:bg-blue-50 rounded-xl mb-3 p-3 flex flex-col gap-2 transition-colors">
-            <div class="skel h-3.5 w-4/5 mx-auto"></div>
-            <div class="skel h-1.5 w-full mt-1"></div>
-            <div class="skel h-1.5 w-full"></div>
-            <div class="skel h-1.5 w-3/4"></div>
-            <div class="skel h-1.5 w-full"></div>
+          <!-- New card -->
+          <div onclick="openModal()" class="card-hover bg-white rounded-2xl border-2 border-dashed border-gray-200 p-5 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-[#4A6CF7] hover:bg-indigo-50 transition-all group min-h-[200px]">
+            <div class="w-10 h-10 rounded-xl bg-gray-50 group-hover:bg-indigo-100 flex items-center justify-center transition-colors">
+              <svg class="w-5 h-5 text-gray-400 group-hover:text-[#4A6CF7] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <p class="text-sm font-medium text-gray-400 group-hover:text-[#4A6CF7] transition-colors">新建写作助手</p>
           </div>
-          <p class="text-xs font-semibold text-gray-800">领导讲话稿</p>
-          <p class="text-[11px] text-gray-400 mt-0.5">大字号 / 宽行距 / 居中标题</p>
         </div>
       </div>
     </div>
 
-    <div>
-      <p class="text-[11px] font-semibold text-gray-300 uppercase tracking-widest mb-4">我的模板</p>
-      <div class="grid grid-cols-4 gap-4 max-w-[860px]">
-        <div class="bg-white rounded-2xl border border-[#4285F4] border-opacity-30 p-4 cursor-pointer hover:border-[#4285F4] hover:shadow-md transition-all">
-          <div class="h-28 bg-blue-50 rounded-xl mb-3 p-3 flex flex-col gap-1.5">
-            <div class="h-2.5 bg-blue-200 rounded-sm w-3/5"></div>
-            <div class="h-1.5 bg-blue-100 rounded-sm w-full mt-1"></div>
-            <div class="h-1.5 bg-blue-100 rounded-sm w-full"></div>
-            <div class="h-2 bg-blue-200 rounded-sm w-2/5 mt-1"></div>
-            <div class="h-1.5 bg-blue-100 rounded-sm w-full"></div>
+    <!-- ── STYLE DETAIL ── -->
+    <div id="view-styledetail" class="view absolute inset-0 flex-col overflow-hidden bg-[#F5F6FA]">
+      <div class="h-12 bg-white border-b border-gray-100 flex items-center px-6 flex-shrink-0">
+        <button onclick="showView('stylelib')" class="text-gray-400 hover:text-gray-700 mr-4 transition-colors">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        </button>
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center text-sm">📊</div>
+          <h1 class="text-sm font-semibold text-gray-900">季度汇报风格</h1>
+          <span class="text-[11px] font-bold bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full">就绪</span>
+        </div>
+        <div class="ml-auto flex gap-2">
+          <button class="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">追加文章</button>
+          <button onclick="showView('writer');showToast('已切换至「季度汇报风格」','success')" class="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#4A6CF7] rounded-lg hover:bg-indigo-600 shadow-sm">使用此助手</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="bg-white border-b border-gray-100 px-6">
+        <div class="flex gap-5">
+          <button data-dtab="report" onclick="switchDTab(this,'report')" class="dtab py-3 text-sm font-semibold text-[#4A6CF7] border-b-2 border-[#4A6CF7]">文风报告</button>
+          <button data-dtab="articles" onclick="switchDTab(this,'articles')" class="dtab py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-700">训练文章（5）</button>
+          <button data-dtab="trial" onclick="switchDTab(this,'trial')" class="dtab py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-700">试写示例</button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6">
+        <div id="dtab-report" class="tab-pane active max-w-[860px]">
+          <div class="grid grid-cols-3 gap-5">
+            <div class="bg-white rounded-2xl border border-gray-100 p-5">
+              <p class="text-sm font-semibold text-gray-800 mb-4">文风雷达图</p>
+              <div style="height:190px;position:relative">
+                <canvas id="radarChart"></canvas>
+              </div>
+            </div>
+            <div class="col-span-2 space-y-4">
+              <div class="bg-white rounded-2xl border border-gray-100 p-5">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2"><span class="w-5 h-5 bg-indigo-50 rounded-md flex items-center justify-center text-xs">👤</span>用户画像</h3>
+                  <button class="text-xs text-gray-400 hover:text-[#4A6CF7]">编辑</button>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  <div class="bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 mb-1">行业</p><p class="text-sm font-semibold text-gray-800">政府机关</p></div>
+                  <div class="bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 mb-1">层级</p><p class="text-sm font-semibold text-gray-800">中层管理干部</p></div>
+                  <div class="bg-gray-50 rounded-xl p-3"><p class="text-[11px] text-gray-400 mb-1">读者</p><p class="text-sm font-semibold text-gray-800">上级领导</p></div>
+                </div>
+              </div>
+              <div class="bg-white rounded-2xl border border-gray-100 p-5">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-sm font-semibold text-gray-800 flex items-center gap-2"><span class="w-5 h-5 bg-purple-50 rounded-md flex items-center justify-center text-xs">✍️</span>用词习惯</h3>
+                  <button class="text-xs text-gray-400 hover:text-[#4A6CF7]">编辑</button>
+                </div>
+                <div class="flex flex-wrap gap-1.5 mb-3">
+                  <span class="text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded-md font-medium">扎实推进</span>
+                  <span class="text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded-md font-medium">落地落实</span>
+                  <span class="text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded-md font-medium">切实提升</span>
+                  <span class="text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded-md font-medium">有序推进</span>
+                  <span class="text-xs px-2 py-1 bg-indigo-50 text-indigo-600 rounded-md font-medium">持续深化</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                  <div class="bg-gray-50 rounded-xl p-2.5"><p class="text-gray-400">平均句长</p><p class="font-bold text-gray-800 mt-0.5">28 字</p></div>
+                  <div class="bg-gray-50 rounded-xl p-2.5"><p class="text-gray-400">文章节奏</p><p class="font-bold text-gray-800 mt-0.5">稳健匀速</p></div>
+                  <div class="bg-gray-50 rounded-xl p-2.5"><p class="text-gray-400">逻辑结构</p><p class="font-bold text-gray-800 mt-0.5">总—分—总</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dtab-articles" class="tab-pane max-w-[640px] space-y-3">
+          <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4">
+            <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center"><svg class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            <div class="flex-1 min-w-0"><p class="text-sm font-medium text-gray-800">2024年第四季度工作总结</p><p class="text-xs text-gray-400">1,842 字 · 上传于 2025-03-20</p></div>
+            <button class="text-xs text-gray-300 hover:text-red-400 transition-colors px-2">删除</button>
+          </div>
+          <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4">
+            <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center"><svg class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            <div class="flex-1 min-w-0"><p class="text-sm font-medium text-gray-800">2024年度工作总结汇报</p><p class="text-xs text-gray-400">2,315 字 · 上传于 2025-03-20</p></div>
+            <button class="text-xs text-gray-300 hover:text-red-400 transition-colors px-2">删除</button>
+          </div>
+          <div class="mt-2 p-4 border-2 border-dashed border-gray-200 rounded-xl text-center hover:border-[#4A6CF7] hover:bg-indigo-50 transition-all cursor-pointer group">
+            <p class="text-sm text-gray-400 group-hover:text-[#4A6CF7] transition-colors font-medium">+ 追加训练文章（还可添加 3 篇）</p>
+          </div>
+        </div>
+
+        <div id="dtab-trial" class="tab-pane max-w-[640px]">
+          <div class="bg-white rounded-2xl border border-gray-100 p-6 mb-5">
+            <div class="flex items-center justify-between mb-4">
+              <p class="text-sm font-semibold text-gray-800">AI 试写示例</p>
+              <span class="text-xs font-semibold bg-green-50 text-green-600 border border-green-100 px-2 py-0.5 rounded-full">高度匹配</span>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4 text-sm leading-[2.1] text-gray-700">
+              <p class="indent-[2em]">本季度工作在部门领导班子的统一部署下，按照年初制定的工作计划有序推进，各项重点任务均取得了阶段性成果，为完成全年目标任务奠定了坚实基础。</p>
+              <p class="mt-2 indent-[2em]">后续将进一步深化已有工作成效，切实将各项部署要求落到实处，确保各项工作按序时高质量完成。</p>
+            </div>
           </div>
           <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-semibold text-gray-800">我的汇报模板</p>
-              <p class="text-[11px] text-gray-400 mt-0.5">修改于昨天</p>
+            <p class="text-sm text-gray-500">文风感觉如何？</p>
+            <div class="flex gap-2">
+              <button class="px-3 py-2 text-sm font-medium text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50">不太像，重训</button>
+              <button onclick="showView('writer');showToast('已激活「季度汇报风格」，开始写作！','success')" class="px-4 py-2 text-sm font-semibold text-white bg-[#4A6CF7] rounded-lg hover:bg-indigo-600 shadow-sm">确认使用</button>
             </div>
-            <button class="text-gray-300 hover:text-gray-500 transition-colors p-1">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
-            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div><!-- /view-templates -->
 
-<!-- ───────────────────────────────────────────────
-     VIEW: HISTORY
-─────────────────────────────────────────────── -->
-<div id="view-history" class="view flex-col flex-1 overflow-hidden">
-  <header class="h-14 bg-white border-b border-gray-100 flex items-center px-8 flex-shrink-0">
-    <h1 class="text-base font-semibold text-gray-900">历史记录</h1>
-    <div class="ml-auto">
-      <input type="text" placeholder="搜索历史文稿..."
-        class="text-sm px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:border-[#4285F4] focus:ring-2 focus:ring-blue-50 transition-all w-52 text-gray-600 placeholder-gray-400">
+    <!-- ── TEMPLATES (NEW) ── -->
+    <div id="view-templates" class="view absolute inset-0 flex-col overflow-hidden bg-[#F5F6FA]">
+      <div class="h-12 bg-white border-b border-gray-100 flex items-center px-6 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <button onclick="showView('home')" class="text-gray-400 hover:text-gray-700 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          </button>
+          <h1 class="text-sm font-semibold text-gray-800">排版模板库 <span class="new-badge">新功能</span></h1>
+          <span class="text-xs text-gray-400 ml-1">（资料库 → 排版模板库）</span>
+        </div>
+        <button class="ml-auto flex items-center gap-2 px-3.5 py-1.5 bg-[#4A6CF7] text-white text-xs font-semibold rounded-lg hover:bg-indigo-600 transition-colors shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>新建模板
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div>
+          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">系统预置模板</p>
+          <div class="grid grid-cols-4 gap-4 max-w-[860px]">
+            <div class="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-indigo-200 hover:shadow-md transition-all group">
+              <div class="h-24 bg-gray-50 group-hover:bg-indigo-50 rounded-xl mb-3 p-3 flex flex-col gap-1.5 transition-colors">
+                <div class="h-3 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-full mt-1"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-full"></div>
+                <div class="h-2 bg-gray-200 rounded w-1/2 mt-1"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-full"></div>
+              </div>
+              <p class="text-xs font-semibold text-gray-800">通用公文</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">仿宋 / 方正标题 / 1.5倍</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-indigo-200 hover:shadow-md transition-all group">
+              <div class="h-24 bg-gray-50 group-hover:bg-indigo-50 rounded-xl mb-3 p-3 flex flex-col gap-1.5 transition-colors">
+                <div class="h-2.5 bg-gray-200 rounded w-1/2"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-full mt-1"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-full"></div>
+                <div class="h-2 bg-gray-200 rounded w-2/5 mt-1"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-4/5"></div>
+              </div>
+              <p class="text-xs font-semibold text-gray-800">工作汇报</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">楷体 / 蓝色标题 / 1.8倍</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-indigo-200 hover:shadow-md transition-all group">
+              <div class="h-24 bg-gray-50 group-hover:bg-indigo-50 rounded-xl mb-3 p-3 flex flex-col gap-1 transition-colors">
+                <div class="flex gap-2 mb-1"><div class="h-2 bg-gray-200 rounded w-1/3"></div><div class="h-2 bg-gray-100 rounded w-1/4"></div></div>
+                <div class="border-t border-gray-200 my-1"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-full"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-4/5"></div>
+                <div class="h-2 bg-gray-200 rounded w-2/5 mt-1"></div>
+              </div>
+              <p class="text-xs font-semibold text-gray-800">会议纪要</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">简约 / 分隔线分区</p>
+            </div>
+            <div class="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-indigo-200 hover:shadow-md transition-all group">
+              <div class="h-24 bg-gray-50 group-hover:bg-indigo-50 rounded-xl mb-3 p-3 flex flex-col gap-2 transition-colors">
+                <div class="h-3.5 bg-gray-200 rounded w-4/5 mx-auto"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-full mt-1"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-full"></div>
+                <div class="h-1.5 bg-gray-100 rounded w-3/4"></div>
+              </div>
+              <p class="text-xs font-semibold text-gray-800">领导讲话稿</p>
+              <p class="text-[11px] text-gray-400 mt-0.5">大字号 / 宽行距 / 居中</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">我的模板</p>
+          <div class="grid grid-cols-4 gap-4 max-w-[860px]">
+            <div class="bg-white rounded-2xl border border-indigo-200 p-4 cursor-pointer hover:border-indigo-400 hover:shadow-md transition-all">
+              <div class="h-24 bg-indigo-50 rounded-xl mb-3 p-3 flex flex-col gap-1.5">
+                <div class="h-2.5 bg-indigo-200 rounded w-3/5"></div>
+                <div class="h-1.5 bg-indigo-100 rounded w-full mt-1"></div>
+                <div class="h-1.5 bg-indigo-100 rounded w-full"></div>
+                <div class="h-2 bg-indigo-200 rounded w-2/5 mt-1"></div>
+              </div>
+              <div class="flex items-center justify-between">
+                <div><p class="text-xs font-semibold text-gray-800">我的汇报模板</p><p class="text-[11px] text-gray-400">修改于昨天</p></div>
+                <button class="text-gray-300 hover:text-gray-500 transition-colors p-1">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </header>
-  <div class="flex-1 overflow-y-auto p-8">
-    <div class="max-w-[680px] space-y-2">
-      <div onclick="showView('write')" class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4 cursor-pointer hover:border-gray-200 hover:shadow-sm transition-all">
-        <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-[#4285F4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-gray-800">2025年第一季度工作总结</p>
-          <p class="text-xs text-gray-400 mt-0.5">1,247 字 &nbsp;·&nbsp; 季度汇报风格 &nbsp;·&nbsp; 执行了润色、升华、校对</p>
-        </div>
-        <div class="text-right flex-shrink-0">
-          <p class="text-xs text-gray-400">今天 09:46</p>
-          <p class="text-[11px] text-green-500 mt-0.5 font-medium">已保存</p>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4 cursor-pointer hover:border-gray-200 hover:shadow-sm transition-all">
-        <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-gray-800">关于推进信息化建设工作的汇报</p>
-          <p class="text-xs text-gray-400 mt-0.5">876 字 &nbsp;·&nbsp; 季度汇报风格</p>
-        </div>
-        <div class="text-right flex-shrink-0">
-          <p class="text-xs text-gray-400">昨天 16:23</p>
-          <p class="text-[11px] text-green-500 mt-0.5 font-medium">已保存</p>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4 cursor-pointer hover:border-gray-200 hover:shadow-sm transition-all">
-        <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-gray-800">五四青年节职工代表发言稿</p>
-          <p class="text-xs text-gray-400 mt-0.5">1,103 字 &nbsp;·&nbsp; 领导讲话稿 &nbsp;·&nbsp; 执行了升华</p>
-        </div>
-        <div class="text-right flex-shrink-0">
-          <p class="text-xs text-gray-400">04-28</p>
-          <p class="text-[11px] text-green-500 mt-0.5 font-medium">已保存</p>
-        </div>
-      </div>
-      <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4 cursor-pointer hover:border-gray-200 hover:shadow-sm transition-all">
-        <div class="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-gray-800">2024年度工作总结暨2025年工作计划</p>
-          <p class="text-xs text-gray-400 mt-0.5">2,034 字 &nbsp;·&nbsp; 季度汇报风格</p>
-        </div>
-        <div class="text-right flex-shrink-0">
-          <p class="text-xs text-gray-400">04-15</p>
-          <p class="text-[11px] text-green-500 mt-0.5 font-medium">已保存</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div><!-- /view-history -->
 
-</main><!-- /main -->
+  </div><!-- /views container -->
+</div><!-- /main -->
 
-<!-- ═══════════════════════════════════════════════
-     MODAL: CREATE ASSISTANT
-═══════════════════════════════════════════════ -->
-<div id="modal-bg" class="modal-bg" onclick="handleModalBgClick(event)">
-  <div id="modal-box" class="bg-white rounded-2xl w-[580px] max-h-[85vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
-
-    <!-- Header -->
-    <div class="px-6 pt-6 pb-5 border-b border-gray-100 flex items-start justify-between">
+<!-- ══════════════════════════════════════
+     MODAL: Create Assistant
+══════════════════════════════════════ -->
+<div id="modal-bg" class="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="bg-white rounded-2xl w-[560px] max-h-[82vh] flex flex-col shadow-2xl" onclick="event.stopPropagation()">
+    <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex items-start justify-between">
       <div>
         <h2 class="text-base font-semibold text-gray-900">新建写作助手</h2>
-        <p class="text-xs text-gray-400 mt-1">上传代表你写作风格的文章，AI 将深度分析并建立专属文风模型</p>
+        <p class="text-xs text-gray-400 mt-1">上传代表你写作风格的文章，AI 深度分析建立专属文风模型</p>
       </div>
-      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0 ml-4">
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors ml-4 flex-shrink-0">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
 
-    <!-- Step indicator -->
+    <!-- Steps -->
     <div class="px-6 py-4 flex items-center">
-      <div class="flex items-center w-full gap-0">
-        <div class="flex items-center gap-2">
-          <div id="sc1" class="step-circle w-6 h-6 rounded-full bg-[#4285F4] text-white text-xs flex items-center justify-center font-bold">1</div>
-          <span id="sl1" class="text-xs font-semibold text-[#4285F4]">基本信息</span>
-        </div>
-        <div class="flex-1 h-px bg-gray-200 mx-3"></div>
-        <div class="flex items-center gap-2">
-          <div id="sc2" class="step-circle w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center font-bold">2</div>
-          <span id="sl2" class="text-xs font-semibold text-gray-400">上传文章</span>
-        </div>
-        <div class="flex-1 h-px bg-gray-200 mx-3"></div>
-        <div class="flex items-center gap-2">
-          <div id="sc3" class="step-circle w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center font-bold">3</div>
-          <span id="sl3" class="text-xs font-semibold text-gray-400">试写验证</span>
-        </div>
-      </div>
+      <div id="sc1" class="step-dot w-6 h-6 rounded-full bg-[#4A6CF7] text-white text-xs flex items-center justify-center font-bold">1</div>
+      <div id="sl1" class="text-xs font-semibold text-[#4A6CF7] ml-2">基本信息</div>
+      <div class="flex-1 h-px bg-gray-200 mx-3"></div>
+      <div id="sc2" class="step-dot w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center font-bold">2</div>
+      <div id="sl2" class="text-xs font-semibold text-gray-400 ml-2">上传文章</div>
+      <div class="flex-1 h-px bg-gray-200 mx-3"></div>
+      <div id="sc3" class="step-dot w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center font-bold">3</div>
+      <div id="sl3" class="text-xs font-semibold text-gray-400 ml-2">试写验证</div>
     </div>
 
-    <!-- Step bodies -->
     <div class="flex-1 overflow-y-auto">
-      <!-- Step 1 -->
-      <div id="step1" class="px-6 pb-6 space-y-4">
+      <div id="ms1" class="px-6 pb-6 space-y-4">
         <div>
           <label class="block text-xs font-semibold text-gray-700 mb-2">助手名称 <span class="text-red-400">*</span></label>
-          <input type="text" placeholder="如：季度汇报风格、对外公告文体..."
-            class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-[#4285F4] focus:ring-2 focus:ring-blue-50 transition-all text-gray-800 placeholder-gray-400">
+          <input type="text" placeholder="如：季度汇报风格、对外公告文体..." class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-[#4A6CF7] focus:ring-2 focus:ring-indigo-50 transition-all placeholder-gray-400">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-gray-700 mb-2">适用场景描述 <span class="text-gray-400 font-normal">（选填）</span></label>
-          <textarea rows="3" placeholder="描述这个助手的使用场景，如：面向上级领导的季度工作汇报，强调数据成果和问题解决..."
-            class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-[#4285F4] focus:ring-2 focus:ring-blue-50 transition-all text-gray-800 placeholder-gray-400 resize-none leading-relaxed"></textarea>
-          <p class="text-xs text-gray-400 mt-1.5">填写场景描述有助于提升文风分析的准确性</p>
+          <label class="block text-xs font-semibold text-gray-700 mb-2">适用场景 <span class="text-gray-400 font-normal">（选填）</span></label>
+          <textarea rows="3" placeholder="描述使用场景，有助于提升分析准确性..." class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:border-[#4A6CF7] focus:ring-2 focus:ring-indigo-50 transition-all placeholder-gray-400 resize-none"></textarea>
         </div>
       </div>
-
-      <!-- Step 2 -->
-      <div id="step2" class="px-6 pb-6 hidden">
+      <div id="ms2" class="px-6 pb-6 hidden">
         <div class="flex items-center justify-between mb-3">
-          <p class="text-xs text-gray-500">上传 <strong class="text-gray-800">1～10 篇</strong> 代表你写作风格的文章，每篇建议不少于 200 字</p>
+          <p class="text-xs text-gray-500">上传 <strong class="text-gray-800">1～10 篇</strong> 代表你风格的文章</p>
           <span class="text-xs font-semibold text-gray-400">0 / 10</span>
         </div>
-        <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#4285F4] hover:bg-blue-50 transition-all cursor-pointer group mb-4">
-          <div class="w-12 h-12 bg-gray-100 group-hover:bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors">
-            <svg class="w-6 h-6 text-gray-400 group-hover:text-[#4285F4] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+        <div class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-[#4A6CF7] hover:bg-indigo-50 transition-all cursor-pointer group mb-4">
+          <div class="w-12 h-12 bg-gray-100 group-hover:bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-3 transition-colors">
+            <svg class="w-6 h-6 text-gray-400 group-hover:text-[#4A6CF7] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
           </div>
-          <p class="text-sm font-semibold text-gray-500 group-hover:text-[#4285F4] transition-colors">点击上传或拖拽文件至此</p>
-          <p class="text-xs text-gray-400 mt-1">支持 .txt、.docx 格式</p>
+          <p class="text-sm font-semibold text-gray-500 group-hover:text-[#4A6CF7] transition-colors">点击上传或拖拽至此</p>
+          <p class="text-xs text-gray-400 mt-1">支持 .txt、.docx · 每篇建议不少于 200 字</p>
         </div>
-        <div class="text-center mb-4">
-          <span class="text-xs text-gray-300 px-4 relative">
-            <span class="absolute inset-x-0 top-1/2 border-t border-gray-100"></span>
-            <span class="relative bg-white px-3 text-gray-400">或者</span>
-          </span>
-        </div>
-        <button class="w-full py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-          粘贴文章文本内容
-        </button>
+        <button class="w-full py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">粘贴文章文本</button>
       </div>
-
-      <!-- Step 3 -->
-      <div id="step3" class="px-6 pb-6 hidden">
-        <div class="bg-green-50 border border-green-100 rounded-xl p-3.5 mb-5 flex items-center gap-2.5">
+      <div id="ms3" class="px-6 pb-6 hidden">
+        <div class="bg-green-50 border border-green-100 rounded-xl p-3.5 mb-4 flex items-center gap-2.5">
           <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-          <p class="text-xs text-green-700 font-medium">文风分析完成！已识别 <strong>5</strong> 大文风特征维度，请查看试写示例。</p>
+          <p class="text-xs text-green-700 font-medium">文风分析完成！已识别 5 大文风维度，请查看试写示例。</p>
         </div>
-        <p class="text-xs font-semibold text-gray-500 mb-2.5">AI 试写示例（200 字）</p>
         <div class="bg-gray-50 rounded-xl p-4 text-sm leading-[2.1] text-gray-700 mb-4">
-          <p class="indent-[2em]">本季度工作在部门领导班子的统一部署下，按照年初制定的工作计划有序推进，各项重点任务均取得了阶段性成果，整体工作呈现出积极向好的发展态势。</p>
-          <p class="mt-2 indent-[2em]">后续将进一步深化已有工作成效，持续加强内部协调配合，切实将各项部署要求落到实处，确保按时序高质量完成各项目标任务。</p>
+          <p class="indent-[2em]">本季度工作在部门领导班子的统一部署下，各项重点任务均取得了阶段性成果，为完成全年目标奠定了坚实基础。</p>
+          <p class="mt-2 indent-[2em]">后续将进一步深化工作成效，切实将各项部署要求落到实处，确保按序时高质量完成目标任务。</p>
         </div>
         <div class="flex items-center justify-between">
-          <p class="text-xs text-gray-500">文风匹配感觉如何？</p>
+          <p class="text-xs text-gray-500">文风感觉如何？</p>
           <div class="flex gap-2">
-            <button class="text-xs px-3 py-1.5 text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 font-medium">重新训练</button>
-            <button class="text-xs px-3 py-1.5 text-[#4285F4] border border-blue-200 bg-blue-50 rounded-lg hover:bg-blue-100 font-medium">重新生成</button>
+            <button class="text-xs px-3 py-1.5 text-gray-500 border border-gray-200 rounded-lg">重新训练</button>
+            <button class="text-xs px-3 py-1.5 text-[#4A6CF7] border border-indigo-200 bg-indigo-50 rounded-lg">重新生成</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Footer -->
     <div class="px-6 py-4 border-t border-gray-100 flex items-center">
-      <button id="btn-back" onclick="modalPrev()" class="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors invisible">← 上一步</button>
+      <button id="mbk" onclick="mPrev()" class="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors invisible">← 上一步</button>
       <div class="ml-auto flex gap-2">
-        <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">取消</button>
-        <button id="btn-next" onclick="modalNext()" class="px-5 py-2 text-sm font-semibold text-white bg-[#4285F4] rounded-lg hover:bg-blue-500 transition-colors shadow-sm">下一步 →</button>
+        <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50">取消</button>
+        <button id="mnx" onclick="mNext()" class="px-5 py-2 text-sm font-semibold text-white bg-[#4A6CF7] rounded-lg hover:bg-indigo-600 shadow-sm">下一步 →</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Toast container -->
+<!-- Toast -->
 <div id="toasts" class="fixed bottom-6 right-6 flex flex-col gap-2 z-[999] pointer-events-none"></div>
 
-<!-- ═══════════════════════════════════════════════
-     JAVASCRIPT
-═══════════════════════════════════════════════ -->
 <script>
-// ── View system ──────────────────────────────
+// ── Views ──────────────────────────────────────
 function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const v = document.getElementById('view-' + name);
   if (v) v.classList.add('active');
 
-  const navName = (name === 'detail') ? 'assistants' : name;
-  const nb = document.querySelector(`[data-view="${navName}"]`);
-  if (nb) nb.classList.add('active');
+  const map = { home:'home', writer:'writer', elevation:'elevation', stylelib:'stylelib', styledetail:'stylelib', templates:'templates' };
+  const nbMap = {
+    home: '[onclick="showView(\'home\')"]',
+    writer: '[onclick="showView(\'writer\')"]',
+    elevation: '[onclick="showView(\'elevation\')"]',
+    templates: '[onclick="showView(\'templates\')"]',
+  };
 
-  // Close version panel
   document.getElementById('ver-panel').classList.remove('open');
-  // Close assistant dropdown
-  document.getElementById('asst-dropdown').classList.add('hidden');
-
-  if (name === 'detail') setTimeout(renderRadar, 80);
+  if (name === 'styledetail') setTimeout(renderRadar, 80);
 }
 
-// ── Tab system ───────────────────────────────
-function switchTab(btn, name) {
-  document.querySelectorAll('.tab-btn').forEach(b => {
-    b.className = 'tab-btn py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition-colors';
+// ── Submenu ─────────────────────────────────────
+let submenuOpen = false;
+function toggleSubmenu() {
+  submenuOpen = !submenuOpen;
+  document.getElementById('submenu-lib').classList.toggle('open', submenuOpen);
+  document.getElementById('submenu-arrow').style.transform = submenuOpen ? 'rotate(90deg)' : '';
+}
+
+// ── Detail tabs ──────────────────────────────────
+function switchDTab(btn, name) {
+  document.querySelectorAll('.dtab').forEach(b => {
+    b.className = 'dtab py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-700';
   });
-  btn.className = 'tab-btn py-3 text-sm font-medium text-[#4285F4] border-b-2 border-[#4285F4] transition-colors';
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  const pane = document.getElementById('tab-' + name);
-  if (pane) pane.classList.add('active');
-  if (name === 'style') setTimeout(renderRadar, 80);
+  btn.className = 'dtab py-3 text-sm font-semibold text-[#4A6CF7] border-b-2 border-[#4A6CF7]';
+  ['report','articles','trial'].forEach(t => {
+    const el = document.getElementById('dtab-' + t);
+    if (el) el.classList.toggle('active', t === name);
+  });
+  if (name === 'report') setTimeout(renderRadar, 60);
 }
 
-// ── Assistant dropdown ───────────────────────
-function toggleAsstDropdown() {
-  document.getElementById('asst-dropdown').classList.toggle('hidden');
+// ── Radar ────────────────────────────────────────
+let radarInst = null;
+function renderRadar() {
+  const c = document.getElementById('radarChart');
+  if (!c) return;
+  if (radarInst) { radarInst.destroy(); radarInst = null; }
+  radarInst = new Chart(c, {
+    type: 'radar',
+    data: {
+      labels: ['正式度','专业性','逻辑性','简洁性','文学性'],
+      datasets: [{ data: [4.2,4.5,4.0,3.5,2.8],
+        backgroundColor: 'rgba(74,108,247,0.1)', borderColor: '#4A6CF7', borderWidth: 2,
+        pointBackgroundColor: '#4A6CF7', pointBorderColor: '#fff', pointRadius: 4 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{min:0,max:5,ticks:{display:false},
+        grid:{color:'rgba(0,0,0,0.05)'}, angleLines:{color:'rgba(0,0,0,0.05)'},
+        pointLabels:{font:{size:11,family:'Inter',weight:'600'}, color:'#6B7280'}}}
+    }
+  });
 }
-function selectAsst(name, color) {
-  const btn = document.querySelector('#asst-dropdown-wrap > button');
-  const dot = btn.querySelector('span');
-  dot.className = `w-2 h-2 rounded-full bg-${color}-400`;
-  btn.querySelector('span:nth-child(2)') && (btn.childNodes[3].textContent = ' ' + name);
-  // Rebuild button text properly
-  btn.innerHTML = `<span class="w-2 h-2 rounded-full bg-${color}-400"></span>${name}<svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>`;
-  document.getElementById('asst-dropdown').classList.add('hidden');
-  showToast(`已切换至「${name}」`, 'success');
-}
-document.addEventListener('click', (e) => {
-  if (!document.getElementById('asst-dropdown-wrap').contains(e.target)) {
-    document.getElementById('asst-dropdown').classList.add('hidden');
-  }
-});
 
-// ── Version panel ────────────────────────────
+// ── Version panel ────────────────────────────────
 function toggleVerPanel() {
   document.getElementById('ver-panel').classList.toggle('open');
 }
 
-// ── Auxiliary functions ───────────────────────
-const auxLabels = { polish:'润色', elevate:'升华', proofread:'校对', layout:'排版' };
+// ── Aux functions ────────────────────────────────
+const auxMap = { polish:'润色', elevate:'升华', proofread:'校对', layout:'排版' };
 function applyAux(type) {
-  showToast(`正在执行「${auxLabels[type]}」，已保存操作前快照…`, 'info');
+  showToast(`正在执行「${auxMap[type]}」，已保存操作前快照…`, 'info');
   if (type === 'proofread') {
     setTimeout(() => {
       const p = document.getElementById('proof-panel');
@@ -1015,149 +1040,80 @@ function applyAux(type) {
   } else if (type === 'elevate') {
     setTimeout(() => showToast('升华完成，已插入 2 处经典引文', 'success'), 1600);
   } else {
-    setTimeout(() => showToast(`「${auxLabels[type]}」执行完成`, 'success'), 1100);
+    setTimeout(() => showToast(`「${auxMap[type]}」执行完成`, 'success'), 1100);
   }
 }
-function acceptProof(btn) {
-  btn.closest('.flex.items-start').remove();
-  const list = document.getElementById('proof-list');
-  if (!list.children.length) {
-    document.getElementById('proof-panel').classList.add('hidden');
-    showToast('所有建议已处理完毕', 'success');
-  }
-}
-function ignoreProof(btn) { btn.closest('.flex.items-start').remove(); }
 
-// ── Chat ─────────────────────────────────────
+// ── Chat ─────────────────────────────────────────
 function sendMsg() {
   const input = document.getElementById('chat-input');
   const text = input.value.trim();
   if (!text) return;
-  const container = document.getElementById('chat-msgs');
+  const list = document.getElementById('chat-list');
 
-  const userEl = document.createElement('div');
-  userEl.className = 'msg-in flex justify-end';
-  userEl.innerHTML = `<div><div class="bg-[#4285F4] text-white text-sm rounded-2xl rounded-tr-sm px-3.5 py-2.5 leading-relaxed max-w-[240px]">${text}</div><p class="text-right text-[11px] text-gray-300 mt-1 mr-1">刚刚</p></div>`;
-  container.appendChild(userEl);
+  const um = document.createElement('div');
+  um.className = 'msg-in flex justify-end';
+  um.innerHTML = `<div><div class="bg-[#4A6CF7] text-white text-sm rounded-2xl rounded-tr-sm px-3.5 py-2.5 leading-relaxed max-w-[220px]">${text}</div><p class="text-right text-[11px] text-gray-300 mt-1 mr-1">刚刚</p></div>`;
+  list.appendChild(um);
   input.value = '';
-  container.scrollTop = container.scrollHeight;
+  list.scrollTop = list.scrollHeight;
 
-  const typingEl = document.createElement('div');
-  typingEl.className = 'msg-in flex items-start gap-2.5';
-  typingEl.id = 'typing';
-  typingEl.innerHTML = `<div class="w-6 h-6 rounded-full bg-[#4285F4] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm"><span class="text-white text-[10px] font-bold">M</span></div><div class="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5"><span class="dot-pulse w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span><span class="dot-pulse w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span><span class="dot-pulse w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span></div>`;
-  container.appendChild(typingEl);
-  container.scrollTop = container.scrollHeight;
+  const ti = document.createElement('div');
+  ti.className = 'msg-in flex items-start gap-2.5'; ti.id = 'typing';
+  ti.innerHTML = `<div class="w-6 h-6 rounded-full bg-[#4A6CF7] flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-[10px] font-bold">M</span></div><div class="bg-gray-50 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5"><span class="dot-typing w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span><span class="dot-typing w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span><span class="dot-typing w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span></div>`;
+  list.appendChild(ti); list.scrollTop = list.scrollHeight;
 
   setTimeout(() => {
     document.getElementById('typing')?.remove();
-    const aiEl = document.createElement('div');
-    aiEl.className = 'msg-in flex items-start gap-2.5';
-    aiEl.innerHTML = `<div class="w-6 h-6 rounded-full bg-[#4285F4] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm"><span class="text-white text-[10px] font-bold">M</span></div><div><div class="bg-gray-50 text-gray-700 text-sm rounded-2xl rounded-tl-sm px-3.5 py-2.5 leading-relaxed max-w-[230px]">好的，已按您的要求对文稿进行了调整，请在右侧查看更新后的内容。</div><p class="text-[11px] text-gray-300 mt-1 ml-1">刚刚</p></div>`;
-    container.appendChild(aiEl);
-    container.scrollTop = container.scrollHeight;
+    const am = document.createElement('div');
+    am.className = 'msg-in flex items-start gap-2.5';
+    am.innerHTML = `<div class="w-6 h-6 rounded-full bg-[#4A6CF7] flex items-center justify-center flex-shrink-0 mt-0.5"><span class="text-white text-[10px] font-bold">M</span></div><div><div class="bg-gray-50 text-gray-700 text-sm rounded-2xl rounded-tl-sm px-3.5 py-2.5 leading-relaxed max-w-[210px]">好的，已按您的要求更新，请在右侧查看。</div><p class="text-[11px] text-gray-300 mt-1 ml-1">刚刚</p></div>`;
+    list.appendChild(am); list.scrollTop = list.scrollHeight;
   }, 1500);
 }
 document.getElementById('chat-input').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
 });
 
-// ── Modal ─────────────────────────────────────
-let step = 1;
-function openModal() {
-  step = 1; renderStep();
-  document.getElementById('modal-bg').classList.add('open');
-}
+// ── Modal ─────────────────────────────────────────
+let mStep = 1;
+function openModal() { mStep = 1; renderModal(); document.getElementById('modal-bg').classList.add('open'); }
 function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
-function handleModalBgClick(e) { if (e.target === document.getElementById('modal-bg')) closeModal(); }
-
-function renderStep() {
+function renderModal() {
   [1,2,3].forEach(i => {
-    document.getElementById('step'+i).classList.toggle('hidden', i !== step);
-    const c = document.getElementById('sc'+i);
-    const l = document.getElementById('sl'+i);
-    if (i < step) {
-      c.className = 'step-circle w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-bold';
-      c.textContent = '✓';
-      l.className = 'text-xs font-semibold text-green-600';
-    } else if (i === step) {
-      c.className = 'step-circle w-6 h-6 rounded-full bg-[#4285F4] text-white text-xs flex items-center justify-center font-bold';
-      c.textContent = i;
-      l.className = 'text-xs font-semibold text-[#4285F4]';
+    document.getElementById('ms'+i).classList.toggle('hidden', i !== mStep);
+    const c = document.getElementById('sc'+i), l = document.getElementById('sl'+i);
+    if (i < mStep) {
+      c.className='step-dot w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-bold'; c.textContent='✓';
+      l.className='text-xs font-semibold text-green-600 ml-2';
+    } else if (i === mStep) {
+      c.className='step-dot w-6 h-6 rounded-full bg-[#4A6CF7] text-white text-xs flex items-center justify-center font-bold'; c.textContent=i;
+      l.className='text-xs font-semibold text-[#4A6CF7] ml-2';
     } else {
-      c.className = 'step-circle w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center font-bold';
-      c.textContent = i;
-      l.className = 'text-xs font-semibold text-gray-400';
+      c.className='step-dot w-6 h-6 rounded-full bg-gray-100 text-gray-400 text-xs flex items-center justify-center font-bold'; c.textContent=i;
+      l.className='text-xs font-semibold text-gray-400 ml-2';
     }
   });
-  document.getElementById('btn-back').style.visibility = step > 1 ? 'visible' : 'hidden';
-  const nextBtn = document.getElementById('btn-next');
-  if (step === 3) {
-    nextBtn.textContent = '完成，激活助手 ✓';
-    nextBtn.onclick = () => { closeModal(); showView('assistants'); showToast('写作助手创建成功！正在进行文风分析…', 'success'); };
-  } else {
-    nextBtn.textContent = '下一步 →';
-    nextBtn.onclick = modalNext;
-  }
+  document.getElementById('mbk').style.visibility = mStep > 1 ? 'visible' : 'hidden';
+  const nx = document.getElementById('mnx');
+  if (mStep === 3) {
+    nx.textContent = '完成，激活助手 ✓';
+    nx.onclick = () => { closeModal(); showView('stylelib'); showToast('助手创建成功，文风分析中…','success'); };
+  } else { nx.textContent = '下一步 →'; nx.onclick = mNext; }
 }
-function modalNext() { if (step < 3) { step++; renderStep(); } }
-function modalPrev() { if (step > 1) { step--; renderStep(); } }
+function mNext() { if (mStep < 3) { mStep++; renderModal(); } }
+function mPrev() { if (mStep > 1) { mStep--; renderModal(); } }
 
-// ── Radar Chart ───────────────────────────────
-let radarInstance = null;
-function renderRadar() {
-  const canvas = document.getElementById('radarChart');
-  if (!canvas) return;
-  if (radarInstance) { radarInstance.destroy(); radarInstance = null; }
-  radarInstance = new Chart(canvas, {
-    type: 'radar',
-    data: {
-      labels: ['正式度', '专业性', '逻辑性', '简洁性', '文学性'],
-      datasets: [{
-        data: [4.2, 4.5, 4.0, 3.5, 2.8],
-        backgroundColor: 'rgba(66,133,244,0.1)',
-        borderColor: '#4285F4',
-        borderWidth: 2,
-        pointBackgroundColor: '#4285F4',
-        pointBorderColor: '#fff',
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        r: {
-          min: 0, max: 5,
-          ticks: { stepSize: 1, display: false },
-          grid: { color: 'rgba(0,0,0,0.05)' },
-          angleLines: { color: 'rgba(0,0,0,0.05)' },
-          pointLabels: {
-            font: { size: 11, family: 'Inter', weight: '600' },
-            color: '#6B7280'
-          }
-        }
-      }
-    }
-  });
-}
-
-// ── Toast ─────────────────────────────────────
-function showToast(msg, type = 'info') {
-  const container = document.getElementById('toasts');
-  const t = document.createElement('div');
+// ── Toast ─────────────────────────────────────────
+function showToast(msg, type='info') {
+  const c = document.getElementById('toasts');
   const colors = { info:'bg-gray-800', success:'bg-emerald-600', warning:'bg-amber-500', error:'bg-red-500' };
   const icons = { info:'ℹ', success:'✓', warning:'⚠', error:'✕' };
-  t.className = `toast-item pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white ${colors[type]||colors.info} max-w-xs`;
-  t.innerHTML = `<span class="text-base leading-none">${icons[type]||icons.info}</span><span>${msg}</span>`;
-  container.appendChild(t);
-  setTimeout(() => {
-    t.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-    t.style.opacity = '0'; t.style.transform = 'translateY(8px)';
-    setTimeout(() => t.remove(), 300);
-  }, 3000);
+  const t = document.createElement('div');
+  t.className = `toast-item pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg text-sm font-medium text-white max-w-xs ${colors[type]||colors.info}`;
+  t.innerHTML = `<span>${icons[type]||icons.info}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.transition='opacity .3s,transform .3s'; t.style.opacity='0'; t.style.transform='translateY(8px)'; setTimeout(()=>t.remove(),300); }, 3000);
 }
 </script>
 </body>
