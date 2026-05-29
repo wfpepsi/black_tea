@@ -1,0 +1,399 @@
+:root {
+  --bg: #f6efe7;
+  --bg-strong: #fffaf4;
+  --ink: #2d1f18;
+  --muted: #7a6557;
+  --line: rgba(76, 48, 33, 0.14);
+  --primary: #c65f38;
+  --primary-dark: #934127;
+  --accent: #1f8f78;
+  --accent-soft: #dff4ed;
+  --shadow: 0 24px 70px rgba(92, 55, 35, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(233, 140, 92, 0.35), transparent 32rem),
+    radial-gradient(circle at bottom right, rgba(31, 143, 120, 0.2), transparent 34rem),
+    var(--bg);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 28px;
+  align-items: stretch;
+  margin-bottom: 24px;
+}
+
+.eyebrow,
+.section-label {
+  margin: 0 0 10px;
+  color: var(--primary-dark);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 760px;
+  margin-bottom: 16px;
+  font-size: clamp(2.4rem, 6vw, 5.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.06em;
+}
+
+h2 {
+  margin-bottom: 18px;
+  font-size: clamp(1.35rem, 2.5vw, 2rem);
+  letter-spacing: -0.04em;
+}
+
+.hero-copy {
+  max-width: 620px;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+.date-card,
+.panel,
+.stat-card {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: rgba(255, 250, 244, 0.78);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.date-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 240px;
+  padding: 28px;
+}
+
+.date-card span,
+.date-card small,
+.stat-card span,
+.stat-card p,
+.hint,
+.habit-content p,
+.empty-state p {
+  color: var(--muted);
+}
+
+.date-card strong {
+  font-size: 3.8rem;
+  line-height: 1;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.stat-card {
+  padding: 24px;
+}
+
+.stat-card strong {
+  display: block;
+  margin: 12px 0 8px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1;
+}
+
+.stat-card p {
+  margin-bottom: 0;
+}
+
+.progress-track {
+  overflow: hidden;
+  height: 12px;
+  margin-top: 20px;
+  border-radius: 999px;
+  background: rgba(198, 95, 56, 0.14);
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), #ed9a5a);
+  transition: width 220ms ease;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.panel {
+  padding: 26px;
+}
+
+.add-panel {
+  position: sticky;
+  top: 24px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px 16px;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+}
+
+input:focus {
+  border-color: rgba(198, 95, 56, 0.7);
+  box-shadow: 0 0 0 4px rgba(198, 95, 56, 0.12);
+}
+
+.input-row button,
+.ghost-button,
+.delete-button {
+  border: 0;
+  border-radius: 18px;
+  font-weight: 800;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.input-row button {
+  padding: 0 20px;
+  color: #fff;
+  background: var(--primary);
+  box-shadow: 0 12px 30px rgba(198, 95, 56, 0.28);
+}
+
+.input-row button:hover,
+.check-button:hover,
+.delete-button:hover,
+.ghost-button:hover {
+  transform: translateY(-1px);
+}
+
+.hint {
+  margin: 14px 0 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.panel-header {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 8px;
+}
+
+.ghost-button {
+  padding: 10px 14px;
+  color: var(--primary-dark);
+  background: rgba(198, 95, 56, 0.12);
+}
+
+.habit-list {
+  display: grid;
+  gap: 14px;
+}
+
+.habit-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #fffaf4;
+}
+
+.habit-card.is-complete {
+  border-color: rgba(31, 143, 120, 0.36);
+  background: linear-gradient(135deg, #ffffff, var(--accent-soft));
+}
+
+.check-button {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 2px solid rgba(198, 95, 56, 0.28);
+  border-radius: 18px;
+  color: transparent;
+  background: #fff;
+  transition: all 180ms ease;
+}
+
+.habit-card.is-complete .check-button {
+  border-color: var(--accent);
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 12px 30px rgba(31, 143, 120, 0.26);
+}
+
+.check-icon {
+  font-size: 1.35rem;
+  font-weight: 900;
+}
+
+.habit-content h3 {
+  margin-bottom: 6px;
+  font-size: 1.16rem;
+}
+
+.habit-content p {
+  margin-bottom: 12px;
+  font-size: 0.92rem;
+}
+
+.mini-calendar {
+  display: flex;
+  gap: 6px;
+}
+
+.day-dot {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: rgba(76, 48, 33, 0.08);
+}
+
+.day-dot.done {
+  color: #fff;
+  background: var(--accent);
+}
+
+.delete-button {
+  padding: 10px 12px;
+  color: #9b3b2e;
+  background: rgba(155, 59, 46, 0.1);
+}
+
+.empty-state {
+  padding: 44px 20px;
+  border: 1px dashed var(--line);
+  border-radius: 22px;
+  text-align: center;
+}
+
+.empty-state strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+}
+
+.empty-state p {
+  margin-bottom: 0;
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    padding: 28px 0;
+  }
+
+  .hero,
+  .dashboard,
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .date-card {
+    min-height: 180px;
+  }
+
+  .add-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell {
+    width: min(100% - 22px, 1120px);
+  }
+
+  .panel,
+  .stat-card,
+  .date-card {
+    border-radius: 22px;
+    padding: 20px;
+  }
+
+  .input-row,
+  .panel-header,
+  .habit-card {
+    grid-template-columns: 1fr;
+  }
+
+  .input-row {
+    flex-direction: column;
+  }
+
+  .input-row button {
+    min-height: 48px;
+  }
+
+  .habit-card {
+    justify-items: start;
+  }
+}

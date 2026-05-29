@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>每日习惯打卡</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Daily Habit Tracker</p>
+          <h1>每天一点点，把好习惯打卡成生活。</h1>
+          <p class="hero-copy">
+            记录你想养成的习惯，完成今日打卡，查看连续坚持天数和今日进度。数据会保存在当前浏览器中。
+          </p>
+        </div>
+        <div class="date-card" aria-live="polite">
+          <span id="weekday">星期</span>
+          <strong id="today">今天</strong>
+          <small>完成今天，就离理想状态更近一步。</small>
+        </div>
+      </section>
+
+      <section class="dashboard" aria-label="今日打卡概览">
+        <article class="stat-card">
+          <span>今日完成</span>
+          <strong id="completed-count">0/0</strong>
+          <div class="progress-track" aria-hidden="true">
+            <div id="progress-bar" class="progress-bar"></div>
+          </div>
+        </article>
+        <article class="stat-card">
+          <span>完成率</span>
+          <strong id="completion-rate">0%</strong>
+          <p>把注意力放在今天这一格。</p>
+        </article>
+        <article class="stat-card">
+          <span>最长连续</span>
+          <strong id="best-streak">0 天</strong>
+          <p>稳定重复，比偶尔冲刺更重要。</p>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <form id="habit-form" class="panel add-panel">
+          <div>
+            <p class="section-label">新习惯</p>
+            <h2>添加今天要坚持的事</h2>
+          </div>
+          <label for="habit-name">习惯名称</label>
+          <div class="input-row">
+            <input id="habit-name" name="habit" type="text" maxlength="28" placeholder="例如：喝 8 杯水" autocomplete="off" required>
+            <button type="submit">添加</button>
+          </div>
+          <p class="hint">建议写得具体一点，例如“阅读 20 分钟”或“晚饭后散步”。</p>
+        </form>
+
+        <section class="panel habit-panel" aria-labelledby="habit-list-title">
+          <div class="panel-header">
+            <div>
+              <p class="section-label">今日清单</p>
+              <h2 id="habit-list-title">我的打卡习惯</h2>
+            </div>
+            <button id="reset-today" class="ghost-button" type="button">重置今日</button>
+          </div>
+          <div id="habit-list" class="habit-list"></div>
+          <template id="habit-template">
+            <article class="habit-card">
+              <button class="check-button" type="button" aria-label="切换今日打卡">
+                <span class="check-icon">✓</span>
+              </button>
+              <div class="habit-content">
+                <h3></h3>
+                <p></p>
+                <div class="mini-calendar" aria-label="最近 7 天打卡记录"></div>
+              </div>
+              <button class="delete-button" type="button" aria-label="删除习惯">删除</button>
+            </article>
+          </template>
+          <div id="empty-state" class="empty-state" hidden>
+            <strong>还没有习惯</strong>
+            <p>从左侧添加一个想坚持的小目标，今天就可以开始打卡。</p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
