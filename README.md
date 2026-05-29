@@ -16,7 +16,7 @@
 
 ## 在线访问
 
-合并到 `main` 后，GitHub Pages 会自动发布网站。发布完成后访问：
+首次发布前，需要在仓库的 GitHub Pages 设置里把 Source 设为 GitHub Actions。之后每次更新 `main`，GitHub Pages 会自动发布网站。发布完成后访问：
 
 ```text
 https://wfpepsi.github.io/black_tea/
