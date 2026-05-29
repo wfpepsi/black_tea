@@ -13,3 +13,11 @@
 ## 使用
 
 直接在浏览器打开 `index.html` 即可使用。
+
+## 在线访问
+
+合并到 `main` 后，GitHub Pages 会自动发布网站。发布完成后访问：
+
+```text
+https://wfpepsi.github.io/black_tea/
+```
